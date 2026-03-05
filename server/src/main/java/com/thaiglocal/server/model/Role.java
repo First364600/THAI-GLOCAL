@@ -1,5 +1,7 @@
 package com.thaiglocal.server.model;
 
+import com.thaiglocal.server.model.enums.RoleName;
+
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -20,7 +22,7 @@ public class Role {
     private Long roleId;
 
     @Enumerated(EnumType.STRING)
-    private Role role;
+    private RoleName role;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "userId", referencedColumnName = "userId", nullable = false)
