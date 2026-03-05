@@ -25,7 +25,7 @@ public class Community {
     private String description;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "communityAdminId", referencedColumnName = "communityAdminId", nullable = false)
+    @JoinColumn(name = "communityAdminId", nullable = false)
     private CommunityAdmin communityAdmin;
 
     @Builder.Default

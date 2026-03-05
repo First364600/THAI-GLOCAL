@@ -18,10 +18,8 @@ import lombok.experimental.SuperBuilder;
 @NoArgsConstructor
 @AllArgsConstructor
 @SuperBuilder
+@PrimaryKeyJoinColumn(name = "userId")
 public class CommunityAdmin extends User {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long communityAdminId;
 
     // Relationship with Community
     @Builder.Default
