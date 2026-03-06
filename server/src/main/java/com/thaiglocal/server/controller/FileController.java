@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.thaiglocal.server.dto.request.FileRequest;
+import com.thaiglocal.server.dto.response.FileResponse;
 import com.thaiglocal.server.service.FileService;
 
 import jakarta.validation.Valid;
@@ -26,12 +27,9 @@ public class FileController {
     }
 
     @PostMapping("/upload")
-    public ResponseEntity<String> uploadFile(@RequestParam("file") MultipartFile file) throws IOException {
-        if (file.isEmpty()) {
-            return ResponseEntity.badRequest().body("File is required");
-        }
-        String url = fileService.uploadImage(file);
-        return ResponseEntity.ok(url);
+    public ResponseEntity<FileResponse> uploadCenterImage(@RequestParam("file") MultipartFile file) throws IOException {
+        FileResponse fileResponse = fileService.uploadCenterImage(file);
+        return ResponseEntity.ok(fileResponse);
     }
 
     @DeleteMapping("/delete")
