@@ -33,6 +33,10 @@ public class CenterService {
                 .centerId(center.getCenterId())
                 .centerName(center.getCenterName())
                 .address(center.getAddress())
+                .subDistrict(center.getSubDistrict())
+                .district(center.getDistrict())
+                .province(center.getProvince())
+                .googleMapLink(center.getGoogleMapLink())
                 .telephone(center.getTelephone())
                 .email(center.getEmail())
                 .line(center.getLine())
@@ -81,7 +85,12 @@ public class CenterService {
     public void createCenter(CenterRequest request){
         Center center = Center.builder()
                 .centerName(request.getCenterName())
+                .description(request.getDescription())
                 .address(request.getAddress())
+                .subDistrict(request.getSubDistrict())
+                .district(request.getDistrict())
+                .province(request.getProvince())
+                .googleMapLink(request.getGoogleMapLink())
                 .telephone(request.getTelephone())
                 .email(request.getEmail())
                 .line(request.getLine())
@@ -103,8 +112,23 @@ public class CenterService {
         if (request.getCenterName() != null) {
             center.setCenterName(request.getCenterName());
         }
+        if (request.getDescription() != null) {
+            center.setDescription(request.getDescription());
+        }
         if (request.getAddress() != null) {
             center.setAddress(request.getAddress());
+        }
+        if (request.getSubDistrict() != null) {
+            center.setSubDistrict(request.getSubDistrict());
+        }
+        if (request.getDistrict() != null) {
+            center.setDistrict(request.getDistrict());
+        }
+        if (request.getProvince() != null) {
+            center.setProvince(request.getProvince());
+        }
+        if (request.getGoogleMapLink() != null) {
+            center.setGoogleMapLink(request.getGoogleMapLink());
         }
         if (request.getTelephone() != null) {
             center.setTelephone(request.getTelephone());

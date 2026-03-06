@@ -24,7 +24,12 @@ public class Center {
     private Long centerId;
 
     private String centerName;
+    private String description;
     private String address;
+    private String subDistrict;
+    private String district;
+    private String province;
+    private String googleMapLink;
     private String telephone;
     private String email;
     private String line;

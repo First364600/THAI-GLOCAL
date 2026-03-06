@@ -13,6 +13,11 @@ import lombok.Setter;
 public class CenterRequest {
     @NotBlank(message = "Center name is required")
     private String centerName;
+    private String description;
+    private String subDistrict;
+    private String district;
+    private String province;
+    private String googleMapLink;
     @NotBlank(message = "Address is required")
     private String address;
     @NotBlank(message = "Telephone is required")
