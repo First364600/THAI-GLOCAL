@@ -5,8 +5,7 @@ export interface Center {
   location: string;
   province: string;
   description: string;
-  image: string;
-  rating: number;
+  images: string[];
   totalActivities: number;
   tags: string[];
 }
@@ -18,20 +17,16 @@ export interface Activity {
   titleTh: string;
   category: string;
   description: string;
-  image: string;
+  images: string[];
   duration: string;
   maxParticipants: number;
   price: number;
   sessions: Session[];
-  tags: string[];
-  difficulty: "Beginner" | "Intermediate" | "Advanced";
-  whatYouLearn: string[];
-  whatToBring: string[];
-  instructor: string;
-  instructorBio: string;
 }
 
 export interface Session {
+  name?: string;
+  description?: string;
   id: string;
   activityId: string;
   date: string;
@@ -49,7 +44,8 @@ export interface Booking {
   phone: string;
   participants: number;
   totalPrice: number;
-  status: "confirmed" | "pending" | "cancelled";
+  status: "confirmed" | "pending" | "cancelled" | "cancellation_requested";
+  cancelRequestedBy?: "participant" | "center";
   createdAt: string;
   notes?: string;
 }
@@ -63,9 +59,8 @@ export const centers: Center[] = [
     province: "Chiang Mai",
     description:
       "Nestled in the misty mountains of northern Thailand, Baan Doi offers authentic hill tribe crafts, traditional weaving, and northern Thai cooking experiences in a serene village setting.",
-    image: "https://images.unsplash.com/photo-1758778932790-da96c9f06969?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxjb21tdW5pdHklMjBjZW50ZXIlMjBsb2NhbCUyMGdhdGhlcmluZyUyMG91dGRvb3J8ZW58MXx8fHwxNzcyNzkyNDU2fDA&ixlib=rb-4.1.0&q=80&w=1080",
-    rating: 4.9,
-    totalActivities: 8,
+    images: ["https://images.unsplash.com/photo-1758778932790-da96c9f06969?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxjb21tdW5pdHklMjBjZW50ZXIlMjBsb2NhbCUyMGdhdGhlcmluZyUyMG91dGRvb3J8ZW58MXx8fHwxNzcyNzkyNDU2fDA&ixlib=rb-4.1.0&q=80&w=1080", "https://images.unsplash.com/photo-1758778932790-da96c9f06969?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxjb21tdW5pdHklMjBjZW50ZXIlMjBsb2NhbCUyMGdhdGhlcmluZyUyMG91dGRvb3J8ZW58MXx8fHwxNzcyNzkyNDU2fDA&ixlib=rb-4.1.0&q=80&w=1080", "https://images.unsplash.com/photo-1758778932790-da96c9f06969?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxjb21tdW5pdHklMjBjZW50ZXIlMjBsb2NhbCUyMGdhdGhlcmluZyUyMG91dGRvb3J8ZW58MXx8fHwxNzcyNzkyNDU2fDA&ixlib=rb-4.1.0&q=80&w=1080"],
+totalActivities: 8,
     tags: ["Crafts", "Cooking", "Culture"],
   },
   {
@@ -76,9 +71,8 @@ export const centers: Center[] = [
     province: "Khon Kaen",
     description:
       "Celebrating the rich heritage of northeastern Thailand, Isan Roots specializes in traditional silk weaving, local music (mor lam), and authentic Isan cuisine workshops.",
-    image: "https://images.unsplash.com/photo-1664071186356-4276ad9a022a?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxUaGFpJTIwdGVtcGxlJTIwbWVkaXRhdGlvbiUyMHlvZ2ElMjBjb21tdW5pdHl8ZW58MXx8fHwxNzcyNzkyNDUxfDA&ixlib=rb-4.1.0&q=80&w=1080",
-    rating: 4.7,
-    totalActivities: 6,
+    images: ["https://images.unsplash.com/photo-1664071186356-4276ad9a022a?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxUaGFpJTIwdGVtcGxlJTIwbWVkaXRhdGlvbiUyMHlvZ2ElMjBjb21tdW5pdHl8ZW58MXx8fHwxNzcyNzkyNDUxfDA&ixlib=rb-4.1.0&q=80&w=1080", "https://images.unsplash.com/photo-1664071186356-4276ad9a022a?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxUaGFpJTIwdGVtcGxlJTIwbWVkaXRhdGlvbiUyMHlvZ2ElMjBjb21tdW5pdHl8ZW58MXx8fHwxNzcyNzkyNDUxfDA&ixlib=rb-4.1.0&q=80&w=1080", "https://images.unsplash.com/photo-1664071186356-4276ad9a022a?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxUaGFpJTIwdGVtcGxlJTIwbWVkaXRhdGlvbiUyMHlvZ2ElMjBjb21tdW5pdHl8ZW58MXx8fHwxNzcyNzkyNDUxfDA&ixlib=rb-4.1.0&q=80&w=1080"],
+totalActivities: 6,
     tags: ["Weaving", "Music", "Cuisine"],
   },
   {
@@ -89,9 +83,8 @@ export const centers: Center[] = [
     province: "Surat Thani",
     description:
       "Located on the lush hillsides of Koh Samui, this eco-learning center focuses on tropical herbs, traditional medicine, coconut palm weaving, and sustainable living practices.",
-    image: "https://images.unsplash.com/photo-1587997767711-f0a39f2bdc7f?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxuYXR1cmFsJTIwaGVyYiUyMGdhcmRlbiUyMGdyZWVuJTIwcGxhbnRzfGVufDF8fHx8MTc3Mjc5MjQ1Nnww&ixlib=rb-4.1.0&q=80&w=1080",
-    rating: 4.8,
-    totalActivities: 5,
+    images: ["https://images.unsplash.com/photo-1587997767711-f0a39f2bdc7f?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxuYXR1cmFsJTIwaGVyYiUyMGdhcmRlbiUyMGdyZWVuJTIwcGxhbnRzfGVufDF8fHx8MTc3Mjc5MjQ1Nnww&ixlib=rb-4.1.0&q=80&w=1080", "https://images.unsplash.com/photo-1587997767711-f0a39f2bdc7f?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxuYXR1cmFsJTIwaGVyYiUyMGdhcmRlbiUyMGdyZWVuJTIwcGxhbnRzfGVufDF8fHx8MTc3Mjc5MjQ1Nnww&ixlib=rb-4.1.0&q=80&w=1080", "https://images.unsplash.com/photo-1587997767711-f0a39f2bdc7f?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxuYXR1cmFsJTIwaGVyYiUyMGdhcmRlbiUyMGdyZWVuJTIwcGxhbnRzfGVufDF8fHx8MTc3Mjc5MjQ1Nnww&ixlib=rb-4.1.0&q=80&w=1080"],
+totalActivities: 5,
     tags: ["Herbs", "Eco", "Wellness"],
   },
   {
@@ -102,9 +95,8 @@ export const centers: Center[] = [
     province: "Ayutthaya",
     description:
       "In the ancient capital of Thailand, this center preserves the royal arts of fruit carving, traditional painting, and classical dance — connecting visitors with Thailand's golden age.",
-    image: "https://images.unsplash.com/photo-1599704622881-97280ae9eaa9?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxUaGFpJTIwZnJ1aXQlMjBjYXJ2aW5nJTIwdHJhZGl0aW9uYWwlMjBhcnR8ZW58MXx8fHwxNzcyNzkyNDU5fDA&ixlib=rb-4.1.0&q=80&w=1080",
-    rating: 4.6,
-    totalActivities: 7,
+    images: ["https://images.unsplash.com/photo-1599704622881-97280ae9eaa9?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxUaGFpJTIwZnJ1aXQlMjBjYXJ2aW5nJTIwdHJhZGl0aW9uYWwlMjBhcnR8ZW58MXx8fHwxNzcyNzkyNDU5fDA&ixlib=rb-4.1.0&q=80&w=1080", "https://images.unsplash.com/photo-1599704622881-97280ae9eaa9?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxUaGFpJTIwZnJ1aXQlMjBjYXJ2aW5nJTIwdHJhZGl0aW9uYWwlMjBhcnR8ZW58MXx8fHwxNzcyNzkyNDU5fDA&ixlib=rb-4.1.0&q=80&w=1080", "https://images.unsplash.com/photo-1599704622881-97280ae9eaa9?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxUaGFpJTIwZnJ1aXQlMjBjYXJ2aW5nJTIwdHJhZGl0aW9uYWwlMjBhcnR8ZW58MXx8fHwxNzcyNzkyNDU5fDA&ixlib=rb-4.1.0&q=80&w=1080"],
+totalActivities: 7,
     tags: ["Art", "History", "Dance"],
   },
 ];
@@ -118,29 +110,16 @@ export const activities: Activity[] = [
     category: "Crafts",
     description:
       "Learn the ancient art of wheel-thrown pottery using traditional northern Thai techniques passed down through generations. Shape clay into beautiful vessels while overlooking misty mountains. All skill levels welcome — our master potter will guide you from clay to finished piece.",
-    image:
-      "https://images.unsplash.com/photo-1664787294667-b64f325a751a?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxUaGFpJTIwdHJhZGl0aW9uYWwlMjBjcmFmdCUyMHdvcmtzaG9wJTIwcG90dGVyeXxlbnwxfHx8fDE3NzI3OTI0NDR8MA&ixlib=rb-4.1.0&q=80&w=1080",
+    images: ["https://images.unsplash.com/photo-1664787294667-b64f325a751a?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxUaGFpJTIwdHJhZGl0aW9uYWwlMjBjcmFmdCUyMHdvcmtzaG9wJTIwcG90dGVyeXxlbnwxfHx8fDE3NzI3OTI0NDR8MA&ixlib=rb-4.1.0&q=80&w=1080", "https://images.unsplash.com/photo-1664787294667-b64f325a751a?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxUaGFpJTIwdHJhZGl0aW9uYWwlMjBjcmFmdCUyMHdvcmtzaG9wJTIwcG90dGVyeXxlbnwxfHx8fDE3NzI3OTI0NDR8MA&ixlib=rb-4.1.0&q=80&w=1080", "https://images.unsplash.com/photo-1664787294667-b64f325a751a?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxUaGFpJTIwdHJhZGl0aW9uYWwlMjBjcmFmdCUyMHdvcmtzaG9wJTIwcG90dGVyeXxlbnwxfHx8fDE3NzI3OTI0NDR8MA&ixlib=rb-4.1.0&q=80&w=1080"],
     duration: "3 hours",
     maxParticipants: 12,
     price: 850,
     sessions: [
-      { id: "s1a", activityId: "a1", date: "2026-03-10", time: "09:00", availableSpots: 8, totalSpots: 12 },
-      { id: "s1b", activityId: "a1", date: "2026-03-12", time: "13:00", availableSpots: 5, totalSpots: 12 },
-      { id: "s1c", activityId: "a1", date: "2026-03-15", time: "09:00", availableSpots: 12, totalSpots: 12 },
-      { id: "s1d", activityId: "a1", date: "2026-03-17", time: "13:00", availableSpots: 3, totalSpots: 12 },
+      { id: "s1a", name: "Morning Masterclass", description: "Join us for a wonderful experience learning the fundamentals and advancing your skills in a practical environment.", activityId: "a1", date: "2026-03-10", time: "09:00", availableSpots: 8, totalSpots: 12 },
+      { id: "s1b", name: "Special Workshop Session", description: "Join us for a wonderful experience learning the fundamentals and advancing your skills in a practical environment.", activityId: "a1", date: "2026-03-12", time: "13:00", availableSpots: 5, totalSpots: 12 },
+      { id: "s1c", name: "Afternoon Practice", description: "Join us for a wonderful experience learning the fundamentals and advancing your skills in a practical environment.", activityId: "a1", date: "2026-03-15", time: "09:00", availableSpots: 12, totalSpots: 12 },
+      { id: "s1d", name: "Special Workshop Session", description: "Join us for a wonderful experience learning the fundamentals and advancing your skills in a practical environment.", activityId: "a1", date: "2026-03-17", time: "13:00", availableSpots: 3, totalSpots: 12 },
     ],
-    tags: ["Pottery", "Crafts", "Traditional"],
-    difficulty: "Beginner",
-    whatYouLearn: [
-      "Traditional wheel-throwing techniques",
-      "Northern Thai pottery styles and motifs",
-      "Clay preparation and glazing basics",
-      "Kiln firing process overview",
-    ],
-    whatToBring: ["Comfortable clothes you don't mind getting dirty", "Water bottle", "Camera (optional)"],
-    instructor: "Ajarn Somsak Kanjana",
-    instructorBio:
-      "Master potter with 30+ years of experience preserving northern Thai ceramics traditions. Studied under the royal ceramics program.",
   },
   {
     id: "a2",
@@ -150,28 +129,15 @@ export const activities: Activity[] = [
     category: "Crafts",
     description:
       "Discover the intricate patterns of hill tribe textiles — from Akha to Karen styles. Use traditional backstrap looms to weave your own fabric strip while learning the symbolic meanings behind each pattern.",
-    image:
-      "https://images.unsplash.com/photo-1737606985741-479bece921b7?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxUaGFpJTIwdHJhZGl0aW9uYWwlMjB3ZWF2aW5nJTIwdGV4dGlsZSUyMGFydHxlbnwxfHx8fDE3NzI3OTI0NTB8MA&ixlib=rb-4.1.0&q=80&w=1080",
+    images: ["https://images.unsplash.com/photo-1737606985741-479bece921b7?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxUaGFpJTIwdHJhZGl0aW9uYWwlMjB3ZWF2aW5nJTIwdGV4dGlsZSUyMGFydHxlbnwxfHx8fDE3NzI3OTI0NTB8MA&ixlib=rb-4.1.0&q=80&w=1080", "https://images.unsplash.com/photo-1737606985741-479bece921b7?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxUaGFpJTIwdHJhZGl0aW9uYWwlMjB3ZWF2aW5nJTIwdGV4dGlsZSUyMGFydHxlbnwxfHx8fDE3NzI3OTI0NTB8MA&ixlib=rb-4.1.0&q=80&w=1080", "https://images.unsplash.com/photo-1737606985741-479bece921b7?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxUaGFpJTIwdHJhZGl0aW9uYWwlMjB3ZWF2aW5nJTIwdGV4dGlsZSUyMGFydHxlbnwxfHx8fDE3NzI3OTI0NTB8MA&ixlib=rb-4.1.0&q=80&w=1080"],
     duration: "4 hours",
     maxParticipants: 8,
     price: 1100,
     sessions: [
-      { id: "s2a", activityId: "a2", date: "2026-03-11", time: "09:00", availableSpots: 6, totalSpots: 8 },
-      { id: "s2b", activityId: "a2", date: "2026-03-14", time: "09:00", availableSpots: 4, totalSpots: 8 },
-      { id: "s2c", activityId: "a2", date: "2026-03-18", time: "09:00", availableSpots: 8, totalSpots: 8 },
+      { id: "s2a", name: "Morning Masterclass", description: "Join us for a wonderful experience learning the fundamentals and advancing your skills in a practical environment.", activityId: "a2", date: "2026-03-11", time: "09:00", availableSpots: 6, totalSpots: 8 },
+      { id: "s2b", name: "Evening Gathering", description: "Join us for a wonderful experience learning the fundamentals and advancing your skills in a practical environment.", activityId: "a2", date: "2026-03-14", time: "09:00", availableSpots: 4, totalSpots: 8 },
+      { id: "s2c", name: "Evening Gathering", description: "Join us for a wonderful experience learning the fundamentals and advancing your skills in a practical environment.", activityId: "a2", date: "2026-03-18", time: "09:00", availableSpots: 8, totalSpots: 8 },
     ],
-    tags: ["Weaving", "Textiles", "Hill Tribe"],
-    difficulty: "Intermediate",
-    whatYouLearn: [
-      "Backstrap loom operation",
-      "Hill tribe pattern symbolism",
-      "Natural dye techniques",
-      "Color combination traditions",
-    ],
-    whatToBring: ["Patience and curiosity", "Comfortable clothes", "Small scissors (optional)"],
-    instructor: "Khun Mala Chiangdao",
-    instructorBio:
-      "Born into a Karen weaving family, Mala has been teaching textile arts for 15 years and is a certified cultural heritage instructor.",
   },
   {
     id: "a3",
@@ -181,28 +147,15 @@ export const activities: Activity[] = [
     category: "Cooking",
     description:
       "Master the bold, herby flavors of Lanna cuisine — northern Thailand's distinct culinary tradition. Learn to make Khao Soi, Larb Muang, and Nam Prik Ong from scratch using fresh local ingredients and ancient family recipes.",
-    image:
-      "https://images.unsplash.com/photo-1578366941741-9e517759c620?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxUaGFpJTIwY29va2luZyUyMGNsYXNzJTIwZm9vZCUyMHdvcmtzaG9wfGVufDF8fHx8MTc3Mjc5MjQ0N3ww&ixlib=rb-4.1.0&q=80&w=1080",
+    images: ["https://images.unsplash.com/photo-1578366941741-9e517759c620?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxUaGFpJTIwY29va2luZyUyMGNsYXNzJTIwZm9vZCUyMHdvcmtzaG9wfGVufDF8fHx8MTc3Mjc5MjQ0N3ww&ixlib=rb-4.1.0&q=80&w=1080", "https://images.unsplash.com/photo-1578366941741-9e517759c620?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxUaGFpJTIwY29va2luZyUyMGNsYXNzJTIwZm9vZCUyMHdvcmtzaG9wfGVufDF8fHx8MTc3Mjc5MjQ0N3ww&ixlib=rb-4.1.0&q=80&w=1080", "https://images.unsplash.com/photo-1578366941741-9e517759c620?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxUaGFpJTIwY29va2luZyUyMGNsYXNzJTIwZm9vZCUyMHdvcmtzaG9wfGVufDF8fHx8MTc3Mjc5MjQ0N3ww&ixlib=rb-4.1.0&q=80&w=1080"],
     duration: "5 hours",
     maxParticipants: 10,
     price: 1350,
     sessions: [
-      { id: "s3a", activityId: "a3", date: "2026-03-09", time: "08:00", availableSpots: 7, totalSpots: 10 },
-      { id: "s3b", activityId: "a3", date: "2026-03-13", time: "08:00", availableSpots: 10, totalSpots: 10 },
-      { id: "s3c", activityId: "a3", date: "2026-03-16", time: "08:00", availableSpots: 2, totalSpots: 10 },
+      { id: "s3a", name: "Afternoon Practice", description: "Join us for a wonderful experience learning the fundamentals and advancing your skills in a practical environment.", activityId: "a3", date: "2026-03-09", time: "08:00", availableSpots: 7, totalSpots: 10 },
+      { id: "s3b", name: "Morning Masterclass", description: "Join us for a wonderful experience learning the fundamentals and advancing your skills in a practical environment.", activityId: "a3", date: "2026-03-13", time: "08:00", availableSpots: 10, totalSpots: 10 },
+      { id: "s3c", name: "Special Workshop Session", description: "Join us for a wonderful experience learning the fundamentals and advancing your skills in a practical environment.", activityId: "a3", date: "2026-03-16", time: "08:00", availableSpots: 2, totalSpots: 10 },
     ],
-    tags: ["Cooking", "Lanna", "Food"],
-    difficulty: "Beginner",
-    whatYouLearn: [
-      "Lanna spice paste preparation",
-      "Traditional Khao Soi recipe",
-      "Proper wok technique over charcoal",
-      "Food presentation in banana leaf",
-    ],
-    whatToBring: ["Appetite!", "Apron (provided)", "Recipe notebook (provided)"],
-    instructor: "Mae Kanchana Wiphat",
-    instructorBio:
-      "Third-generation Lanna cook and food historian. Her recipes have been featured in international culinary publications.",
   },
   {
     id: "a4",
@@ -212,59 +165,33 @@ export const activities: Activity[] = [
     category: "Crafts",
     description:
       "Learn the sacred art of Mudmee silk weaving — a UNESCO-recognized craft of northeastern Thailand. Create your own resist-dyed silk pattern using the ancient tie-dye technique before weaving it on a traditional floor loom.",
-    image:
-      "https://images.unsplash.com/photo-1677142707558-b02ac0690ecb?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxiYW1ib28lMjBiYXNrZXQlMjB3ZWF2aW5nJTIwY3JhZnQlMjBoYW5kbWFkZXxlbnwxfHx8fDE3NzI3OTI0NTl8MA&ixlib=rb-4.1.0&q=80&w=1080",
+    images: ["https://images.unsplash.com/photo-1677142707558-b02ac0690ecb?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxiYW1ib28lMjBiYXNrZXQlMjB3ZWF2aW5nJTIwY3JhZnQlMjBoYW5kbWFkZXxlbnwxfHx8fDE3NzI3OTI0NTl8MA&ixlib=rb-4.1.0&q=80&w=1080", "https://images.unsplash.com/photo-1677142707558-b02ac0690ecb?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxiYW1ib28lMjBiYXNrZXQlMjB3ZWF2aW5nJTIwY3JhZnQlMjBoYW5kbWFkZXxlbnwxfHx8fDE3NzI3OTI0NTl8MA&ixlib=rb-4.1.0&q=80&w=1080", "https://images.unsplash.com/photo-1677142707558-b02ac0690ecb?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxiYW1ib28lMjBiYXNrZXQlMjB3ZWF2aW5nJTIwY3JhZnQlMjBoYW5kbWFkZXxlbnwxfHx8fDE3NzI3OTI0NTl8MA&ixlib=rb-4.1.0&q=80&w=1080"],
     duration: "6 hours",
     maxParticipants: 8,
     price: 1500,
     sessions: [
-      { id: "s4a", activityId: "a4", date: "2026-03-10", time: "08:00", availableSpots: 5, totalSpots: 8 },
-      { id: "s4b", activityId: "a4", date: "2026-03-14", time: "08:00", availableSpots: 8, totalSpots: 8 },
-      { id: "s4c", activityId: "a4", date: "2026-03-19", time: "08:00", availableSpots: 6, totalSpots: 8 },
+      { id: "s4a", name: "Evening Gathering", description: "Join us for a wonderful experience learning the fundamentals and advancing your skills in a practical environment.", activityId: "a4", date: "2026-03-10", time: "08:00", availableSpots: 5, totalSpots: 8 },
+      { id: "s4b", name: "Afternoon Practice", description: "Join us for a wonderful experience learning the fundamentals and advancing your skills in a practical environment.", activityId: "a4", date: "2026-03-14", time: "08:00", availableSpots: 8, totalSpots: 8 },
+      { id: "s4c", name: "Special Workshop Session", description: "Join us for a wonderful experience learning the fundamentals and advancing your skills in a practical environment.", activityId: "a4", date: "2026-03-19", time: "08:00", availableSpots: 6, totalSpots: 8 },
     ],
-    tags: ["Silk", "Weaving", "Isan"],
-    difficulty: "Advanced",
-    whatYouLearn: [
-      "Mudmee tie-dye resist technique",
-      "Natural silk thread preparation",
-      "Floor loom operation",
-      "Traditional Isan motif patterns",
-    ],
-    whatToBring: ["Comfortable clothes (color-safe)", "Enthusiasm", "Open mind"],
-    instructor: "Phor Chai Saengthong",
-    instructorBio:
-      "National artist and silk weaving master. Phor Chai received a royal award for preserving Mudmee traditions and has trained over 500 students.",
   },
   {
     id: "a5",
     centerId: "c2",
     title: "Mor Lam Music & Dance",
     titleTh: "ดนตรีและรำหมอลำ",
-    category: "Music & Arts",
+    category: "Music",
     description:
       "Immerse yourself in the soulful world of Mor Lam — the heartbeat of Isan culture. Learn basic khaen (bamboo mouth organ) playing and the flowing gestures of traditional Isan dance in a fun, welcoming group setting.",
-    image:
-      "https://images.unsplash.com/photo-1758346974564-07a164871e7d?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxUaGFpJTIwdHJhZGl0aW9uYWwlMjBtdXNpYyUyMGluc3RydW1lbnQlMjB3b3Jrc2hvcHxlbnwxfHx8fDE3NzI3OTI0NTR8MA&ixlib=rb-4.1.0&q=80&w=1080",
+    images: ["https://images.unsplash.com/photo-1758346974564-07a164871e7d?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxUaGFpJTIwdHJhZGl0aW9uYWwlMjBtdXNpYyUyMGluc3RydW1lbnQlMjB3b3Jrc2hvcHxlbnwxfHx8fDE3NzI3OTI0NTR8MA&ixlib=rb-4.1.0&q=80&w=1080", "https://images.unsplash.com/photo-1758346974564-07a164871e7d?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxUaGFpJTIwdHJhZGl0aW9uYWwlMjBtdXNpYyUyMGluc3RydW1lbnQlMjB3b3Jrc2hvcHxlbnwxfHx8fDE3NzI3OTI0NTR8MA&ixlib=rb-4.1.0&q=80&w=1080", "https://images.unsplash.com/photo-1758346974564-07a164871e7d?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxUaGFpJTIwdHJhZGl0aW9uYWwlMjBtdXNpYyUyMGluc3RydW1lbnQlMjB3b3Jrc2hvcHxlbnwxfHx8fDE3NzI3OTI0NTR8MA&ixlib=rb-4.1.0&q=80&w=1080"],
     duration: "3 hours",
     maxParticipants: 15,
     price: 750,
     sessions: [
-      { id: "s5a", activityId: "a5", date: "2026-03-11", time: "16:00", availableSpots: 12, totalSpots: 15 },
-      { id: "s5b", activityId: "a5", date: "2026-03-15", time: "16:00", availableSpots: 8, totalSpots: 15 },
-      { id: "s5c", activityId: "a5", date: "2026-03-20", time: "16:00", availableSpots: 15, totalSpots: 15 },
+      { id: "s5a", name: "Afternoon Practice", description: "Join us for a wonderful experience learning the fundamentals and advancing your skills in a practical environment.", activityId: "a5", date: "2026-03-11", time: "16:00", availableSpots: 12, totalSpots: 15 },
+      { id: "s5b", name: "Afternoon Practice", description: "Join us for a wonderful experience learning the fundamentals and advancing your skills in a practical environment.", activityId: "a5", date: "2026-03-15", time: "16:00", availableSpots: 8, totalSpots: 15 },
+      { id: "s5c", name: "Afternoon Practice", description: "Join us for a wonderful experience learning the fundamentals and advancing your skills in a practical environment.", activityId: "a5", date: "2026-03-20", time: "16:00", availableSpots: 15, totalSpots: 15 },
     ],
-    tags: ["Music", "Dance", "Isan", "Khaen"],
-    difficulty: "Beginner",
-    whatYouLearn: [
-      "Basic khaen (bamboo organ) technique",
-      "Isan rhythmic patterns",
-      "Mor Lam dance gestures",
-      "Cultural context and history",
-    ],
-    whatToBring: ["Comfortable clothing that allows movement", "Water bottle"],
-    instructor: "Khun Sompong Rattana",
-    instructorBio:
-      "Professional Mor Lam performer with 20 years of stage experience and 10 years of teaching. Performed at international festivals in 12 countries.",
   },
   {
     id: "a6",
@@ -274,90 +201,51 @@ export const activities: Activity[] = [
     category: "Wellness",
     description:
       "Walk through a living herb garden and learn how Thai traditional medicine uses local plants for healing. Make your own herbal compress ball (luk pra kob), herbal steam blend, and take-home herbal remedies.",
-    image:
-      "https://images.unsplash.com/photo-1587997767711-f0a39f2bdc7f?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxuYXR1cmFsJTIwaGVyYiUyMGdhcmRlbiUyMGdyZWVuJTIwcGxhbnRzfGVufDF8fHx8MTc3Mjc5MjQ1Nnww&ixlib=rb-4.1.0&q=80&w=1080",
+    images: ["https://images.unsplash.com/photo-1587997767711-f0a39f2bdc7f?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxuYXR1cmFsJTIwaGVyYiUyMGdhcmRlbiUyMGdyZWVuJTIwcGxhbnRzfGVufDF8fHx8MTc3Mjc5MjQ1Nnww&ixlib=rb-4.1.0&q=80&w=1080", "https://images.unsplash.com/photo-1587997767711-f0a39f2bdc7f?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxuYXR1cmFsJTIwaGVyYiUyMGdhcmRlbiUyMGdyZWVuJTIwcGxhbnRzfGVufDF8fHx8MTc3Mjc5MjQ1Nnww&ixlib=rb-4.1.0&q=80&w=1080", "https://images.unsplash.com/photo-1587997767711-f0a39f2bdc7f?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxuYXR1cmFsJTIwaGVyYiUyMGdhcmRlbiUyMGdyZWVuJTIwcGxhbnRzfGVufDF8fHx8MTc3Mjc5MjQ1Nnww&ixlib=rb-4.1.0&q=80&w=1080"],
     duration: "4 hours",
     maxParticipants: 10,
     price: 980,
     sessions: [
-      { id: "s6a", activityId: "a6", date: "2026-03-10", time: "09:00", availableSpots: 9, totalSpots: 10 },
-      { id: "s6b", activityId: "a6", date: "2026-03-13", time: "09:00", availableSpots: 6, totalSpots: 10 },
-      { id: "s6c", activityId: "a6", date: "2026-03-17", time: "09:00", availableSpots: 10, totalSpots: 10 },
+      { id: "s6a", name: "Afternoon Practice", description: "Join us for a wonderful experience learning the fundamentals and advancing your skills in a practical environment.", activityId: "a6", date: "2026-03-10", time: "09:00", availableSpots: 9, totalSpots: 10 },
+      { id: "s6b", name: "Evening Gathering", description: "Join us for a wonderful experience learning the fundamentals and advancing your skills in a practical environment.", activityId: "a6", date: "2026-03-13", time: "09:00", availableSpots: 6, totalSpots: 10 },
+      { id: "s6c", name: "Afternoon Practice", description: "Join us for a wonderful experience learning the fundamentals and advancing your skills in a practical environment.", activityId: "a6", date: "2026-03-17", time: "09:00", availableSpots: 10, totalSpots: 10 },
     ],
-    tags: ["Herbs", "Wellness", "Traditional Medicine"],
-    difficulty: "Beginner",
-    whatYouLearn: [
-      "Identification of 20+ Thai medicinal herbs",
-      "Making herbal compress balls",
-      "Preparing herbal teas for common ailments",
-      "Traditional Thai steam therapy",
-    ],
-    whatToBring: ["Comfortable clothes", "Hat and sunscreen", "Small container for take-home herbs"],
-    instructor: "Dr. Amara Somboon",
-    instructorBio:
-      "Licensed Thai Traditional Medicine practitioner and ethnobotanist. Has documented over 300 local medicinal plant uses in southern Thailand.",
   },
   {
     id: "a7",
     centerId: "c4",
     title: "Royal Thai Fruit Carving",
     titleTh: "แกะสลักผัก-ผลไม้แบบราชสำนัก",
-    category: "Culinary Arts",
+    category: "Cooking",
     description:
       "Master the elegant art of Thai fruit and vegetable carving — a tradition originating in the royal palace. Learn to transform simple produce into intricate flowers, birds, and geometric patterns for stunning garnishes and table decorations.",
-    image:
-      "https://images.unsplash.com/photo-1599704622881-97280ae9eaa9?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxUaGFpJTIwZnJ1aXQlMjBjYXJ2aW5nJTIwdHJhZGl0aW9uYWwlMjBhcnR8ZW58MXx8fHwxNzcyNzkyNDU5fDA&ixlib=rb-4.1.0&q=80&w=1080",
+    images: ["https://images.unsplash.com/photo-1599704622881-97280ae9eaa9?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxUaGFpJTIwZnJ1aXQlMjBjYXJ2aW5nJTIwdHJhZGl0aW9uYWwlMjBhcnR8ZW58MXx8fHwxNzcyNzkyNDU5fDA&ixlib=rb-4.1.0&q=80&w=1080", "https://images.unsplash.com/photo-1599704622881-97280ae9eaa9?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxUaGFpJTIwZnJ1aXQlMjBjYXJ2aW5nJTIwdHJhZGl0aW9uYWwlMjBhcnR8ZW58MXx8fHwxNzcyNzkyNDU5fDA&ixlib=rb-4.1.0&q=80&w=1080", "https://images.unsplash.com/photo-1599704622881-97280ae9eaa9?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxUaGFpJTIwZnJ1aXQlMjBjYXJ2aW5nJTIwdHJhZGl0aW9uYWwlMjBhcnR8ZW58MXx8fHwxNzcyNzkyNDU5fDA&ixlib=rb-4.1.0&q=80&w=1080"],
     duration: "3 hours",
     maxParticipants: 12,
     price: 900,
     sessions: [
-      { id: "s7a", activityId: "a7", date: "2026-03-09", time: "10:00", availableSpots: 10, totalSpots: 12 },
-      { id: "s7b", activityId: "a7", date: "2026-03-12", time: "10:00", availableSpots: 7, totalSpots: 12 },
-      { id: "s7c", activityId: "a7", date: "2026-03-16", time: "10:00", availableSpots: 12, totalSpots: 12 },
+      { id: "s7a", name: "Morning Masterclass", description: "Join us for a wonderful experience learning the fundamentals and advancing your skills in a practical environment.", activityId: "a7", date: "2026-03-09", time: "10:00", availableSpots: 10, totalSpots: 12 },
+      { id: "s7b", name: "Evening Gathering", description: "Join us for a wonderful experience learning the fundamentals and advancing your skills in a practical environment.", activityId: "a7", date: "2026-03-12", time: "10:00", availableSpots: 7, totalSpots: 12 },
+      { id: "s7c", name: "Morning Masterclass", description: "Join us for a wonderful experience learning the fundamentals and advancing your skills in a practical environment.", activityId: "a7", date: "2026-03-16", time: "10:00", availableSpots: 12, totalSpots: 12 },
     ],
-    tags: ["Carving", "Culinary Arts", "Royal Arts"],
-    difficulty: "Intermediate",
-    whatYouLearn: [
-      "Proper carving knife techniques and safety",
-      "Lotus flower and rose carving",
-      "Geometric and border patterns",
-      "Food preservation for display",
-    ],
-    whatToBring: ["Carving tools (provided)", "Apron (provided)", "Patience for intricate work"],
-    instructor: "Khun Nanthawan Pichayabut",
-    instructorBio:
-      "Former palace kitchen graduate and award-winning carving artist. Has demonstrated Thai carving at international food expos across Asia and Europe.",
   },
   {
     id: "a8",
     centerId: "c4",
     title: "Classical Thai Dance (Khon)",
     titleTh: "โขน-รำไทยคลาสสิก",
-    category: "Music & Arts",
+    category: "Arts",
     description:
       "Experience the breathtaking world of Khon — Thailand's UNESCO-recognized masked dance drama. Learn foundational hand gestures (natasin), postures, and movements from classical Ramakien scenes under expert guidance.",
-    image:
-      "https://images.unsplash.com/photo-1664071186356-4276ad9a022a?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxUaGFpJTIwdGVtcGxlJTIwbWVkaXRhdGlvbiUyMHlvZ2ElMjBjb21tdW5pdHl8ZW58MXx8fHwxNzcyNzkyNDUxfDA&ixlib=rb-4.1.0&q=80&w=1080",
+    images: ["https://images.unsplash.com/photo-1664071186356-4276ad9a022a?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxUaGFpJTIwdGVtcGxlJTIwbWVkaXRhdGlvbiUyMHlvZ2ElMjBjb21tdW5pdHl8ZW58MXx8fHwxNzcyNzkyNDUxfDA&ixlib=rb-4.1.0&q=80&w=1080", "https://images.unsplash.com/photo-1664071186356-4276ad9a022a?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxUaGFpJTIwdGVtcGxlJTIwbWVkaXRhdGlvbiUyMHlvZ2ElMjBjb21tdW5pdHl8ZW58MXx8fHwxNzcyNzkyNDUxfDA&ixlib=rb-4.1.0&q=80&w=1080", "https://images.unsplash.com/photo-1664071186356-4276ad9a022a?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxUaGFpJTIwdGVtcGxlJTIwbWVkaXRhdGlvbiUyMHlvZ2ElMjBjb21tdW5pdHl8ZW58MXx8fHwxNzcyNzkyNDUxfDA&ixlib=rb-4.1.0&q=80&w=1080"],
     duration: "2.5 hours",
     maxParticipants: 10,
     price: 1200,
     sessions: [
-      { id: "s8a", activityId: "a8", date: "2026-03-11", time: "14:00", availableSpots: 8, totalSpots: 10 },
-      { id: "s8b", activityId: "a8", date: "2026-03-15", time: "14:00", availableSpots: 5, totalSpots: 10 },
-      { id: "s8c", activityId: "a8", date: "2026-03-18", time: "14:00", availableSpots: 10, totalSpots: 10 },
+      { id: "s8a", name: "Afternoon Practice", description: "Join us for a wonderful experience learning the fundamentals and advancing your skills in a practical environment.", activityId: "a8", date: "2026-03-11", time: "14:00", availableSpots: 8, totalSpots: 10 },
+      { id: "s8b", name: "Afternoon Practice", description: "Join us for a wonderful experience learning the fundamentals and advancing your skills in a practical environment.", activityId: "a8", date: "2026-03-15", time: "14:00", availableSpots: 5, totalSpots: 10 },
+      { id: "s8c", name: "Morning Masterclass", description: "Join us for a wonderful experience learning the fundamentals and advancing your skills in a practical environment.", activityId: "a8", date: "2026-03-18", time: "14:00", availableSpots: 10, totalSpots: 10 },
     ],
-    tags: ["Dance", "Classical", "Khon", "UNESCO"],
-    difficulty: "Beginner",
-    whatYouLearn: [
-      "12 basic Thai dance hand positions",
-      "Khon postures and footwork",
-      "Story of Ramakien",
-      "Costume and mask symbolism",
-    ],
-    whatToBring: ["Comfortable loose-fitting clothes", "Bare feet or dance socks"],
-    instructor: "Ajarn Wichit Therdprasat",
-    instructorBio:
-      "Department of Fine Arts certified Khon instructor with 25 years of performance and teaching experience at the national theater.",
   },
 ];
 
@@ -365,9 +253,9 @@ export const categories = [
   "All",
   "Crafts",
   "Cooking",
-  "Music & Arts",
+  "Arts",
   "Wellness",
-  "Culinary Arts",
+  "Cooking",
 ];
 
 export const provinces = [

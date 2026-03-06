@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from "react";
 import { Link, useLocation, useNavigate } from "react-router";
-import { Menu, X, BookOpen, Map, CalendarCheck, User, LogOut, Building2 } from "lucide-react";
+import { Menu, X, BookOpen, Map, CalendarCheck, User, LogOut, Building2, ShieldAlert } from "lucide-react";
 import useBookingStore from "../store/bookingStore";
 import useAuthStore from "../store/authStore";
 
@@ -49,6 +49,9 @@ export function Navbar() {
       { to: "/my-bookings", label: "My Bookings", icon: CalendarCheck },
       { to: "/my-center", label: "My Center", icon: Building2 },
     ] : []),
+    ...(user && (user.role === "admin" || user.role === "super_admin") ? [
+      { to: "/admin", label: "Admin Panel", icon: ShieldAlert },
+    ] : [])
   ];
 
   const isActive = (path: string) => {

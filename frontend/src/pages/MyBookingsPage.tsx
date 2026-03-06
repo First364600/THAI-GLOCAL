@@ -17,12 +17,14 @@ import { activities, centers, Booking } from "../data/mockData";
 function getStatusIcon(status: Booking["status"]) {
   if (status === "confirmed") return <CheckCircle2 className="w-4 h-4 text-green-500" />;
   if (status === "cancelled") return <XCircle className="w-4 h-4 text-red-400" />;
+  if (status === "cancellation_requested") return <AlertCircle className="w-4 h-4 text-orange-500" />;
   return <AlertCircle className="w-4 h-4 text-amber-400" />;
 }
 
 function getStatusClass(status: Booking["status"]) {
   if (status === "confirmed") return "bg-green-50 text-green-700 border-green-200";
   if (status === "cancelled") return "bg-red-50 text-red-600 border-red-200";
+  if (status === "cancellation_requested") return "bg-orange-50 text-orange-700 border-orange-200";
   return "bg-amber-50 text-amber-700 border-amber-200";
 }
 
@@ -30,6 +32,7 @@ export function MyBookingsPage() {
   const user = useAuthStore((s) => s.user);
   const bookings = useBookingStore((s) => s.bookings);
   const cancelBooking = useBookingStore((s) => s.cancelBooking);
+  const requestCancellation = useBookingStore((s) => s.requestCancellation);
   const [tab, setTab] = useState<"upcoming" | "all">("upcoming");
   const [cancelId, setCancelId] = useState<string | null>(null);
 
@@ -39,7 +42,19 @@ export function MyBookingsPage() {
     const activity = activities.find((a) => a.id === b.activityId);
     const session = activity?.sessions.find((s) => s.id === b.sessionId);
     const center = activity ? centers.find((c) => c.id === activity.centerId) : undefined;
-    return { ...b, activity, session, center };
+    
+    // Check cancellation restriction
+    const currentDate = new Date('2026-03-07');
+    let canCancel = false;
+    let daysUntil = 0;
+    if (session) {
+      const sessionDate = new Date(session.date);
+      const timeDiff = sessionDate.getTime() - currentDate.getTime();
+      daysUntil = Math.ceil(timeDiff / (1000 * 3600 * 24));
+      canCancel = daysUntil >= 3;
+    }
+
+    return { ...b, activity, session, center, canCancel, daysUntil };
   });
 
   const displayed =
@@ -49,7 +64,14 @@ export function MyBookingsPage() {
 
   const confirmCancel = () => {
     if (cancelId) {
-      cancelBooking(cancelId);
+      const booking = bookings.find((b) => b.id === cancelId);
+      if (booking?.status === "confirmed") {
+        // Requires mutual approval
+        requestCancellation(cancelId, "participant");
+        alert("Cancellation requested. Waiting for center approval.");
+      } else {
+        cancelBooking(cancelId);
+      }
       setCancelId(null);
     }
   };
@@ -115,7 +137,7 @@ export function MyBookingsPage() {
                   {booking.activity && (
                     <div className="w-28 sm:w-36 flex-shrink-0">
                       <img
-                        src={booking.activity.image}
+                        src={booking.activity.images?.[0] || ""}
                         alt={booking.activity.title}
                         className="w-full h-full object-cover"
                       />
@@ -141,7 +163,8 @@ export function MyBookingsPage() {
                         )}`}
                       >
                         {getStatusIcon(booking.status)}
-                        {booking.status.charAt(0).toUpperCase() + booking.status.slice(1)}
+                        {booking.status === "cancellation_requested" ? "Cancellation Requested" : 
+                         booking.status.charAt(0).toUpperCase() + booking.status.slice(1)}
                       </span>
                     </div>
 
@@ -182,14 +205,32 @@ export function MyBookingsPage() {
                       <span className="text-amber-700 font-semibold" style={{ fontSize: "0.95rem" }}>
                         ฿{booking.totalPrice.toLocaleString()}
                       </span>
-                      {booking.status !== "cancelled" && (
-                        <button
-                          onClick={() => setCancelId(booking.id)}
-                          className="flex items-center gap-1 text-red-400 hover:text-red-600 transition-colors"
-                          style={{ fontSize: "0.78rem" }}
-                        >
-                          <Trash2 className="w-3.5 h-3.5" /> Cancel
-                        </button>
+                      {booking.status !== "cancelled" && booking.status !== "cancellation_requested" && (
+                        <div className="flex items-center gap-2">
+                          {!booking.canCancel && (
+                            <span className="text-xs text-red-500 mr-2">Too late to cancel</span>
+                          )}
+                          <button
+                            onClick={() => setCancelId(booking.id)}
+                            disabled={!booking.canCancel}
+                            className={`flex items-center gap-1 transition-colors ${
+                              booking.canCancel ? "text-red-400 hover:text-red-600" : "text-stone-300 cursor-not-allowed"
+                            }`}
+                            style={{ fontSize: "0.78rem" }}
+                          >
+                            <Trash2 className="w-3.5 h-3.5" /> Cancel
+                          </button>
+                        </div>
+                      )}
+                      {booking.status === "cancellation_requested" && booking.cancelRequestedBy === "center" && (
+                         <div className="flex gap-2">
+                           <button onClick={() => {
+                             useBookingStore.getState().approveCancellation(booking.id);
+                           }} className="px-3 py-1 bg-red-50 text-red-600 rounded text-xs font-semibold">Approve Cancellation</button>
+                         </div>
+                      )}
+                      {booking.status === "cancellation_requested" && booking.cancelRequestedBy === "participant" && (
+                         <span className="text-xs text-stone-500 italic">Waiting for center approval...</span>
                       )}
                     </div>
                   </div>

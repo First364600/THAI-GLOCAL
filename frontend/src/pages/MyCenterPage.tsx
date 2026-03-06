@@ -2,10 +2,11 @@ import { useState } from "react";
 import { Navigate, useNavigate } from "react-router";
 import {
   Plus, Pencil, Trash2, Building2, Layers, ChevronDown, ChevronUp,
-  X, Save, MapPin, Tag, BookOpen, Clock, Users, DollarSign,
+  X, Save, MapPin, Tag, BookOpen, Clock, Users, DollarSign, ArrowLeft
 } from "lucide-react";
 import useAuthStore from "../store/authStore";
 import useMyCenterStore, { UserCenter, UserWorkshop } from "../store/myCenterStore";
+import { ImageCarousel } from "../components/ImageCarousel";
 
 // ─── helpers ────────────────────────────────────────────────────────────────
 
@@ -86,7 +87,24 @@ const labelCls = "block text-sm font-medium text-stone-700 mb-1.5";
 
 // ─── Center form ─────────────────────────────────────────────────────────────
 
-const EMPTY_CENTER = { name: "", nameTh: "", location: "", province: "", description: "", image: "", tags: [] as string[] };
+const EMPTY_CENTER = {
+  name: "",
+  nameTh: "",
+  subDistrict: "",
+  district: "",
+  province: "",
+  locationLink: "",
+  telephones: [] as string[],
+  email: "",
+  lineId: "",
+  facebook: "",
+  website: "",
+  description: "",
+  communityLeaderFirstName: "",
+  communityLeaderLastName: "",
+  communityLeaderTelephone: "",
+  images: [] as string[],
+};
 
 function CenterForm({ initial, onSave, onCancel }: {
   initial?: Partial<typeof EMPTY_CENTER>;
@@ -100,38 +118,132 @@ function CenterForm({ initial, onSave, onCancel }: {
     <form onSubmit={(e) => { e.preventDefault(); onSave(form); }} className="flex flex-col gap-4">
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div>
-          <label className={labelCls}>Center name (EN) *</label>
+          <label className={labelCls}>Center Name *</label>
           <input required className={inputCls} value={form.name} onChange={(e) => set("name", e.target.value)} placeholder="My Learning Center" />
         </div>
         <div>
-          <label className={labelCls}>ชื่อภาษาไทย</label>
+          <label className={labelCls}>Center Name (TH)</label>
           <input className={inputCls} value={form.nameTh} onChange={(e) => set("nameTh", e.target.value)} placeholder="ศูนย์เรียนรู้ของฉัน" />
         </div>
       </div>
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
         <div>
-          <label className={labelCls}>Location / District *</label>
-          <input required className={inputCls} value={form.location} onChange={(e) => set("location", e.target.value)} placeholder="Mae Rim, Chiang Mai" />
+          <label className={labelCls}>Sub-district (ตำบล/แขวง) *</label>
+          <input required className={inputCls} value={form.subDistrict} onChange={(e) => set("subDistrict", e.target.value)} placeholder="Mae Rim Tai" />
         </div>
         <div>
-          <label className={labelCls}>Province *</label>
+          <label className={labelCls}>District (อำเภอ/เขต) *</label>
+          <input required className={inputCls} value={form.district} onChange={(e) => set("district", e.target.value)} placeholder="Mae Rim" />
+        </div>
+        <div>
+          <label className={labelCls}>Province (จังหวัด) *</label>
           <input required className={inputCls} value={form.province} onChange={(e) => set("province", e.target.value)} placeholder="Chiang Mai" />
         </div>
       </div>
       <div>
-        <label className={labelCls}>Description *</label>
-        <textarea required rows={3} className={inputCls + " resize-none"} value={form.description} onChange={(e) => set("description", e.target.value)} placeholder="Tell guests about your center…" />
+        <label className={labelCls}>Location Link (Google Maps URL)</label>
+        <input type="url" className={inputCls} value={form.locationLink} onChange={(e) => set("locationLink", e.target.value)} placeholder="https://maps.app.goo.gl/..." />
       </div>
-      <div>
-        <label className={labelCls}>Cover image URL</label>
-        <input type="url" className={inputCls} value={form.image} onChange={(e) => set("image", e.target.value)} placeholder="https://images.unsplash.com/…" />
+      
+      <div className="pt-2 border-t border-stone-100">
+        <h3 className="font-medium text-stone-800 mb-4">Contact Information</h3>
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
+          <div className="sm:col-span-2">
+            <label className={labelCls}>Telephones (Max 3, at least 1 required) *</label>
+            <BulletListInput items={form.telephones} onChange={(v) => { if (v.length <= 3) set("telephones", v); }} placeholder="08xxxxxxxx" />
+            {form.telephones.length === 0 && <p className="text-xs text-red-500 mt-1">Please add at least 1 telephone number</p>}
+          </div>
+          <div>
+            <label className={labelCls}>Email</label>
+            <input type="email" className={inputCls} value={form.email} onChange={(e) => set("email", e.target.value)} placeholder="contact@center.com" />
+          </div>
+          <div>
+            <label className={labelCls}>Line ID</label>
+            <input className={inputCls} value={form.lineId} onChange={(e) => set("lineId", e.target.value)} placeholder="@centerline" />
+          </div>
+          <div>
+            <label className={labelCls}>Facebook Page</label>
+            <input className={inputCls} value={form.facebook} onChange={(e) => set("facebook", e.target.value)} placeholder="facebook.com/centerpage" />
+          </div>
+          <div>
+            <label className={labelCls}>Website</label>
+            <input type="url" className={inputCls} value={form.website} onChange={(e) => set("website", e.target.value)} placeholder="https://center.com" />
+          </div>
+        </div>
       </div>
-      <div>
-        <label className={labelCls}><Tag className="w-3.5 h-3.5 inline mr-1" />Tags</label>
-        <TagInput tags={form.tags} onChange={(v) => set("tags", v)} />
+      
+      <div className="pt-2 border-t border-stone-100">
+        <h3 className="font-medium text-stone-800 mb-4">Community Leader Information</h3>
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
+          <div>
+            <label className={labelCls}>First Name</label>
+            <input className={inputCls} value={form.communityLeaderFirstName} onChange={(e) => set("communityLeaderFirstName", e.target.value)} placeholder="First Name" />
+          </div>
+          <div>
+            <label className={labelCls}>Last Name</label>
+            <input className={inputCls} value={form.communityLeaderLastName} onChange={(e) => set("communityLeaderLastName", e.target.value)} placeholder="Last Name" />
+          </div>
+          <div>
+            <label className={labelCls}>Leader's Telephone</label>
+            <input type="tel" className={inputCls} value={form.communityLeaderTelephone} onChange={(e) => set("communityLeaderTelephone", e.target.value)} placeholder="08xxxxxxxx" />
+          </div>
+        </div>
       </div>
-      <div className="flex gap-3 pt-2">
-        <button type="submit" className="flex items-center gap-2 px-5 py-2.5 bg-amber-500 hover:bg-amber-600 text-white rounded-xl text-sm font-medium shadow-sm transition-colors">
+
+      <div className="pt-2 border-t border-stone-100">
+        <h3 className="font-medium text-stone-800 mb-4">Additional Details</h3>
+        <div className="mb-4">
+          <label className={labelCls}>Description *</label>
+          <textarea required rows={4} className={inputCls + " resize-none"} value={form.description} onChange={(e) => set("description", e.target.value)} placeholder="Tell guests about your center…" />
+        </div>
+        <div className="mb-4">
+          <label className={labelCls}>Center Images (Exactly 3, Image only) *</label>
+          <input
+            type="file"
+            accept="image/*"
+            multiple
+            disabled={form.images.length >= 3}
+            onChange={async (e) => {
+              const files = Array.from(e.target.files || []);
+              if (files.length === 0) return;
+              
+              const newImagesInfo = await Promise.all(
+                files.slice(0, 3 - form.images.length).map((file) => {
+                  return new Promise<string>((resolve, reject) => {
+                    const reader = new FileReader();
+                    reader.onload = () => resolve(reader.result as string);
+                    reader.onerror = reject;
+                    reader.readAsDataURL(file);
+                  });
+                })
+              );
+              
+              set("images", [...form.images, ...newImagesInfo]);
+            }}
+            className="block w-full text-sm text-stone-500 file:mr-4 file:py-2.5 file:px-4 file:rounded-xl file:border-0 file:text-sm file:font-semibold file:bg-amber-50 file:text-amber-700 hover:file:bg-amber-100 transition-colors cursor-pointer"
+          />
+          {form.images.length > 0 && (
+            <div className="flex gap-4 mt-4 flex-wrap">
+              {form.images.map((img, i) => (
+                <div key={i} className="relative">
+                  <img src={img} alt={`Center preview ${i+1}`} className="w-24 h-24 object-cover rounded-xl border border-stone-200" />
+                  <button 
+                    type="button" 
+                    onClick={() => set("images", form.images.filter((_, idx) => idx !== i))}
+                    className="absolute -top-2 -right-2 bg-white rounded-full p-1 shadow-sm border border-stone-100 text-stone-400 hover:text-red-500"
+                  >
+                    <X className="w-4 h-4" />
+                  </button>
+                </div>
+              ))}
+            </div>
+          )}
+          {form.images.length !== 3 && <p className="text-xs text-red-500 mt-2">Please upload exactly 3 images before saving.</p>}
+        </div>
+      </div>
+
+      <div className="flex gap-3 pt-4 border-t border-stone-100 mt-2">
+        <button type="submit" disabled={form.telephones.length === 0 || form.images.length !== 3} className="flex items-center gap-2 px-5 py-2.5 bg-amber-500 hover:bg-amber-600 disabled:opacity-50 disabled:cursor-not-allowed text-white rounded-xl text-sm font-medium shadow-sm transition-colors">
           <Save className="w-4 h-4" /> Save Center
         </button>
         {onCancel && (
@@ -147,10 +259,15 @@ function CenterForm({ initial, onSave, onCancel }: {
 // ─── Workshop form ───────────────────────────────────────────────────────────
 
 const EMPTY_ACT = {
-  title: "", titleTh: "", category: "", description: "", image: "",
+  title: "", titleTh: "", category: "Crafts", description: "", images: [] as string[],
   duration: "", maxParticipants: 10, price: 0,
-  difficulty: "Beginner" as UserWorkshop["difficulty"],
-  instructor: "", whatYouLearn: [] as string[], tags: [] as string[],
+  // Auto-generation properties
+  recurringDays: [] as string[], // e.g. ["Mon", "Wed", "Fri"]
+  sessionType: "Daily Time Slots",
+  sessionRounds: [{ start: "13:00", end: "16:00" }],
+  defaultActivityName: "",
+  defaultActivityDescription: "",
+  defaultRegistrationCapacity: 10,
 };
 
 function WorkshopForm({ initial, onSave, onCancel }: {
@@ -159,71 +276,236 @@ function WorkshopForm({ initial, onSave, onCancel }: {
   onCancel: () => void;
 }) {
   const [form, setForm] = useState({ ...EMPTY_ACT, ...initial });
+  const [errorMessage, setErrorMessage] = useState("");
   const set = <K extends keyof typeof EMPTY_ACT>(k: K, v: (typeof EMPTY_ACT)[K]) =>
     setForm((f) => ({ ...f, [k]: v }));
 
+  const toggleDay = (day: string) => {
+    const current = form.recurringDays;
+    set("recurringDays", current.includes(day) ? current.filter(d => d !== day) : [...current, day]);
+  };
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    setErrorMessage("");
+    
+    // Duration Validation Logic
+    if (form.duration && form.sessionRounds && form.sessionRounds.length > 0) {
+      const match = form.duration.match(/(\d+)/);
+      if (match) {
+        const durationHours = parseInt(match[1]);
+        const isValid = form.sessionRounds.every(round => {
+          if (!round.start || !round.end) return true; // skip if incomplete
+          const [sH, sM] = round.start.split(":").map(Number);
+          const [eH, eM] = round.end.split(":").map(Number);
+          let diffHours = eH - sH + (eM - sM) / 60;
+          if (diffHours < 0) diffHours += 24; // Handle overnight gently
+          return Math.abs(diffHours - durationHours) < 0.1; // allow small float err
+        });
+
+        if (!isValid) {
+          setErrorMessage("Error: The selected time slot does not match the Workshop Duration.");
+          return;
+        }
+      }
+    }
+
+    onSave(form);
+  };
+
   return (
-    <form onSubmit={(e) => { e.preventDefault(); onSave(form); }} className="flex flex-col gap-4">
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-        <div>
-          <label className={labelCls}>Workshop title (EN) *</label>
-          <input required className={inputCls} value={form.title} onChange={(e) => set("title", e.target.value)} placeholder="Traditional Thai Cooking" />
+    <form onSubmit={handleSubmit} className="flex flex-col gap-5">
+      {errorMessage && (
+        <div className="bg-red-50 text-red-600 p-4 rounded-xl border border-red-200 font-medium">
+          {errorMessage}
+        </div>
+      )}
+      <div className="bg-stone-50 p-4 rounded-2xl border border-stone-100 flex flex-col gap-4">
+        <h4 className="font-semibold text-stone-800 flex items-center gap-2"><BookOpen className="w-4 h-4 text-amber-500" /> 1. Main Profile</h4>
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div>
+            <label className={labelCls}>Workshop Name *</label>
+            <input required className={inputCls} value={form.title} onChange={(e) => set("title", e.target.value)} placeholder="Traditional Thai Cooking" />
+          </div>
+          <div>
+            <label className={labelCls}>ชื่อภาษาไทย</label>
+            <input className={inputCls} value={form.titleTh} onChange={(e) => set("titleTh", e.target.value)} placeholder="อาหารไทยดั้งเดิม" />
+          </div>
+        </div>
+        <div className="grid grid-cols-1 sm:grid-cols-1 gap-4">
+          <div>
+            <label className={labelCls}>Workshop Category *</label>
+            <select className={inputCls} value={form.category} onChange={(e) => set("category", e.target.value)}>
+              <option>Crafts</option>
+              <option>Cooking</option>
+              <option>Arts</option>
+              <option>Music</option>
+              <option>Wellness</option>
+            </select>
+          </div>
         </div>
         <div>
-          <label className={labelCls}>ชื่อภาษาไทย</label>
-          <input className={inputCls} value={form.titleTh} onChange={(e) => set("titleTh", e.target.value)} placeholder="อาหารไทยดั้งเดิม" />
+          <label className={labelCls}>Description *</label>
+          <textarea required rows={3} className={inputCls + " resize-none"} value={form.description} onChange={(e) => set("description", e.target.value)} placeholder="Overall overview of this workshop program…" />
+        </div>
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+          <div>
+            <label className={labelCls}><Clock className="w-3.5 h-3.5 inline mr-1" />Duration *</label>
+            <input required className={inputCls} value={form.duration} onChange={(e) => set("duration", e.target.value)} placeholder="Define total time per activity, e.g., 3 hours" />
+          </div>
+          <div>
+            <label className={labelCls}><Users className="w-3.5 h-3.5 inline mr-1" />Member Capacity *</label>
+            <input type="number" min={1} className={inputCls} value={form.maxParticipants} onChange={(e) => set("maxParticipants", Number(e.target.value))} placeholder="Total seats available" />
+          </div>
+          <div>
+            <label className={labelCls}><DollarSign className="w-3.5 h-3.5 inline mr-1" />Price *</label>
+            <input type="number" min={0} className={inputCls} value={form.price} onChange={(e) => set("price", Number(e.target.value))} placeholder="Per activity or total" />
+          </div>
         </div>
       </div>
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+
+      <div className="bg-amber-50/50 p-4 rounded-2xl border border-amber-100 flex flex-col gap-4">
+        <h4 className="font-semibold text-stone-800 flex items-center gap-2"><Clock className="w-4 h-4 text-amber-500" /> 2. Create Activity (Activity Scheduler)</h4>
+        
         <div>
-          <label className={labelCls}><BookOpen className="w-3.5 h-3.5 inline mr-1" />Category *</label>
-          <input required className={inputCls} value={form.category} onChange={(e) => set("category", e.target.value)} placeholder="Cooking / Crafts / Music…" />
+          <label className={labelCls}>Recurring Schedule (Select days)</label>
+          <div className="flex flex-wrap gap-2 mt-1">
+            {["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"].map(day => (
+              <button
+                key={day}
+                type="button"
+                onClick={() => toggleDay(day)}
+                className={`px-3 py-1.5 rounded-lg border text-sm font-medium transition-colors ${form.recurringDays.includes(day) ? 'bg-amber-500 border-amber-500 text-white' : 'bg-white border-stone-200 text-stone-600 hover:border-amber-300'}`}
+              >
+                {day}
+              </button>
+            ))}
+          </div>
         </div>
-        <div>
-          <label className={labelCls}>Difficulty</label>
-          <select className={inputCls} value={form.difficulty} onChange={(e) => set("difficulty", e.target.value as UserWorkshop["difficulty"])}>
-            <option>Beginner</option>
-            <option>Intermediate</option>
-            <option>Advanced</option>
-          </select>
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div>
+            <label className={labelCls}>Activity Type</label>
+            <input type="text" readOnly className={`${inputCls} bg-stone-50 text-stone-600`} value="Daily Time Slots" />
+          </div>
+          <div>
+             <label className={labelCls}>Registration Capacity (Seats per activity)</label>
+            <input type="number" min={1} className={inputCls} value={form.defaultRegistrationCapacity} onChange={(e) => set("defaultRegistrationCapacity", Number(e.target.value))} />
+          </div>
+        </div>
+
+        <div className="bg-white p-4 rounded-xl border border-stone-200 flex flex-col gap-3">
+          <div>
+            <div className="flex items-center justify-between mb-1">
+              <p className="text-sm font-medium text-stone-800">Daily Activity Rounds (Add custom rounds for each day)</p>
+              <button
+                type="button"
+                className="text-xs text-amber-600 font-medium hover:text-amber-700 flex items-center gap-1"
+                onClick={() => set("sessionRounds", [...form.sessionRounds, { start: "13:00", end: "16:00" }])}
+              >
+                <Plus className="w-3.5 h-3.5" /> Add Round
+              </button>
+            </div>
+            <p className="text-xs text-stone-500 mb-2">Please specify your preferred time range for each slot (e.g., 13:00 – 16:00).<br/><span className="text-amber-600 font-medium">Requirement:</span> The selected time range must accurately correspond with the total Duration of the activity.</p>
+          </div>
+
+          {form.sessionRounds.map((round, idx) => (
+            <div key={idx} className="flex items-center gap-3 bg-stone-50 p-3 rounded-lg border border-stone-100">
+              <span className="text-xs font-semibold text-stone-400 w-16">Round {idx + 1}</span>
+              <input type="time" className={inputCls + " py-2"} value={round.start} onChange={(e) => {
+                const newRounds = [...form.sessionRounds];
+                newRounds[idx].start = e.target.value;
+                set("sessionRounds", newRounds);
+              }} required />
+              <span className="text-stone-400 font-medium">to</span>
+              <input type="time" className={inputCls + " py-2"} value={round.end} onChange={(e) => {
+                const newRounds = [...form.sessionRounds];
+                newRounds[idx].end = e.target.value;
+                set("sessionRounds", newRounds);
+              }} required />
+              {form.sessionRounds.length > 1 && (
+                <button
+                  type="button"
+                  onClick={() => set("sessionRounds", form.sessionRounds.filter((_, i) => i !== idx))}
+                  className="p-2 text-stone-400 hover:text-red-500 transition-colors"
+                >
+                  <X className="w-4 h-4" />
+                </button>
+              )}
+            </div>
+          ))}
+        </div>
+
+        <div className="bg-blue-50 text-blue-800 p-3 rounded-xl border border-blue-100 text-xs flex gap-2 items-start mt-2">
+          <Clock className="w-4 h-4 shrink-0 mt-0.5" />
+          <div>
+            <strong className="font-medium">Automation Logic: Sunday Weekly Refresh</strong>
+            <p className="mt-0.5 text-blue-700/80">New activity slots are automatically generated every Sunday based on the recurring schedule. Each generated slot can be manually adjusted (e.g., to avoid overlaps or for special events) and generate every activity in one week show.</p>
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 gap-4 hidden">
+          <div>
+             <label className={labelCls}>Default Activity Name</label>
+             <input className={inputCls} value={form.defaultActivityName} onChange={(e) => set("defaultActivityName", e.target.value)} />
+          </div>
+          <div>
+             <label className={labelCls}>Default Activity Description</label>
+             <textarea rows={2} className={inputCls} value={form.defaultActivityDescription} onChange={(e) => set("defaultActivityDescription", e.target.value)} />
+          </div>
         </div>
       </div>
-      <div>
-        <label className={labelCls}>Description *</label>
-        <textarea required rows={3} className={inputCls + " resize-none"} value={form.description} onChange={(e) => set("description", e.target.value)} placeholder="What guests will experience…" />
-      </div>
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-        <div>
-          <label className={labelCls}><Clock className="w-3.5 h-3.5 inline mr-1" />Duration *</label>
-          <input required className={inputCls} value={form.duration} onChange={(e) => set("duration", e.target.value)} placeholder="3 hours" />
+
+      <div className="bg-stone-50 p-4 rounded-2xl border border-stone-100 flex flex-col gap-4">
+        <h4 className="font-semibold text-stone-800 flex items-center gap-2"><Layers className="w-4 h-4 text-amber-500" /> Additional Details</h4>
+        <div className="mb-4">
+          <label className={labelCls}>Workshop Images (Exactly 3, Image only) *</label>
+          <input
+            type="file"
+            accept="image/*"
+            multiple
+            disabled={form.images.length >= 3}
+            onChange={async (e) => {
+              const files = Array.from(e.target.files || []);
+              if (files.length === 0) return;
+              
+              const newImagesInfo = await Promise.all(
+                files.slice(0, 3 - form.images.length).map((file) => {
+                  return new Promise<string>((resolve, reject) => {
+                    const reader = new FileReader();
+                    reader.onload = () => resolve(reader.result as string);
+                    reader.onerror = reject;
+                    reader.readAsDataURL(file);
+                  });
+                })
+              );
+              
+              set("images", [...form.images, ...newImagesInfo]);
+            }}
+            className="block w-full text-sm text-stone-500 file:mr-4 file:py-2.5 file:px-4 file:rounded-xl file:border-0 file:text-sm file:font-semibold file:bg-amber-50 file:text-amber-700 hover:file:bg-amber-100 transition-colors cursor-pointer"
+          />
+          {form.images.length > 0 && (
+            <div className="flex gap-4 mt-4 flex-wrap">
+              {form.images.map((img, i) => (
+                <div key={i} className="relative">
+                  <img src={img} alt={`Workshop preview ${i+1}`} className="w-24 h-24 object-cover rounded-xl border border-stone-200" />
+                  <button 
+                    type="button" 
+                    onClick={() => set("images", form.images.filter((_, idx) => idx !== i))}
+                    className="absolute -top-2 -right-2 bg-white rounded-full p-1 shadow-sm border border-stone-100 text-stone-400 hover:text-red-500"
+                  >
+                    <X className="w-4 h-4" />
+                  </button>
+                </div>
+              ))}
+            </div>
+          )}
+          {form.images.length !== 3 && <p className="text-xs text-red-500 mt-2">Please upload exactly 3 images before saving.</p>}
         </div>
-        <div>
-          <label className={labelCls}><Users className="w-3.5 h-3.5 inline mr-1" />Max participants</label>
-          <input type="number" min={1} className={inputCls} value={form.maxParticipants} onChange={(e) => set("maxParticipants", Number(e.target.value))} />
-        </div>
-        <div>
-          <label className={labelCls}><DollarSign className="w-3.5 h-3.5 inline mr-1" />Price (฿)</label>
-          <input type="number" min={0} className={inputCls} value={form.price} onChange={(e) => set("price", Number(e.target.value))} />
-        </div>
       </div>
-      <div>
-        <label className={labelCls}>Instructor name *</label>
-        <input required className={inputCls} value={form.instructor} onChange={(e) => set("instructor", e.target.value)} placeholder="Your name or instructor's name" />
-      </div>
-      <div>
-        <label className={labelCls}>Cover image URL</label>
-        <input type="url" className={inputCls} value={form.image} onChange={(e) => set("image", e.target.value)} placeholder="https://images.unsplash.com/…" />
-      </div>
-      <div>
-        <label className={labelCls}>What guests will learn</label>
-        <BulletListInput items={form.whatYouLearn} onChange={(v) => set("whatYouLearn", v)} placeholder="E.g. How to make Tom Yum…" />
-      </div>
-      <div>
-        <label className={labelCls}><Tag className="w-3.5 h-3.5 inline mr-1" />Tags</label>
-        <TagInput tags={form.tags} onChange={(v) => set("tags", v)} />
-      </div>
+
       <div className="flex gap-3 pt-2">
-        <button type="submit" className="flex items-center gap-2 px-5 py-2.5 bg-amber-500 hover:bg-amber-600 text-white rounded-xl text-sm font-medium shadow-sm transition-colors">
+        <button type="submit" disabled={form.images.length !== 3} className="flex items-center gap-2 px-5 py-2.5 bg-amber-500 hover:bg-amber-600 disabled:opacity-50 disabled:cursor-not-allowed text-white rounded-xl text-sm font-medium shadow-sm transition-colors">
           <Save className="w-4 h-4" /> Save Workshop
         </button>
         <button type="button" onClick={onCancel} className="px-5 py-2.5 rounded-xl border border-stone-200 text-stone-600 hover:bg-stone-50 text-sm transition-colors">
@@ -243,9 +525,11 @@ function WorkshopCard({ workshop, onEdit, onDelete, onManage }: {
   onManage: () => void;
 }) {
   return (
-    <div className="bg-white rounded-2xl border border-stone-100 shadow-sm overflow-hidden flex flex-col sm:flex-row">
-      {workshop.image ? (
-        <img src={workshop.image} alt={workshop.title} className="w-full sm:w-36 h-32 sm:h-auto object-cover shrink-0" />
+    <div className="bg-white rounded-2xl border border-stone-100 shadow-sm overflow-hidden flex flex-col sm:flex-row group/mycard-carousel">
+      {workshop.images && workshop.images.length > 0 ? (
+        <div className="w-full sm:w-36 h-32 sm:h-auto shrink-0 relative overflow-hidden group-hover/mycard-carousel:[&>div>img]:scale-105">
+          <ImageCarousel images={workshop.images} alt={workshop.title} className="w-full h-full" />
+        </div>
       ) : (
         <div className="w-full sm:w-36 h-32 sm:h-auto bg-amber-50 flex items-center justify-center shrink-0">
           <BookOpen className="w-8 h-8 text-amber-300" />
@@ -279,14 +563,13 @@ function WorkshopCard({ workshop, onEdit, onDelete, onManage }: {
             <span className="flex items-center gap-1"><Clock className="w-3 h-3" />{workshop.duration}</span>
             <span className="flex items-center gap-1"><Users className="w-3 h-3" />Max {workshop.maxParticipants}</span>
             <span className="flex items-center gap-1 font-medium text-amber-700">฿{workshop.price.toLocaleString()}</span>
-            <span className="px-2 py-0.5 bg-stone-100 rounded-full">{workshop.difficulty}</span>
             <span className="px-2 py-0.5 bg-amber-50 text-amber-700 rounded-full">{workshop.category}</span>
           </div>
           <button
             onClick={onManage}
             className="flex items-center gap-1 text-xs font-medium text-amber-600 hover:text-amber-700 transition-colors"
           >
-            Manage Sessions →
+            Manage Activities →
           </button>
         </div>
       </div>
@@ -296,7 +579,7 @@ function WorkshopCard({ workshop, onEdit, onDelete, onManage }: {
 
 // ─── Main Page ────────────────────────────────────────────────────────────────
 
-type Drawer = "none" | "center" | "workshop" | "editWorkshop";
+type Drawer = "none" | "createCenter" | "editCenter" | "workshop" | "editWorkshop";
 
 export function MyCenterPage() {
   const user = useAuthStore((s) => s.user);
@@ -304,34 +587,51 @@ export function MyCenterPage() {
   const navigate = useNavigate();
 
   const [drawer, setDrawer] = useState<Drawer>("none");
+  const [activeCenterId, setActiveCenterId] = useState<string | null>(null);
   const [editingWorkshop, setEditingWorkshop] = useState<UserWorkshop | null>(null);
   const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null);
+  const [pendingWorkshopUpdate, setPendingWorkshopUpdate] = useState<typeof EMPTY_ACT | null>(null);
   const [tab, setTab] = useState<"workshops" | "info">("workshops");
   const [centerExpanded, setCenterExpanded] = useState(false);
 
   if (!user) return <Navigate to="/login" state={{ from: "/my-center" }} replace />;
 
-  const center = store.getCenterByOwner(user.id);
-  const workshops = center ? store.getWorkshopsByCenter(center.id) : [];
+  const centers = store.getCentersByOwner(user.id);
+  const activeCenter = activeCenterId ? centers.find((c) => c.id === activeCenterId) : null;
+  const workshops = activeCenter ? store.getWorkshopsByCenter(activeCenter.id) : [];
 
-  const saveCenter = (data: { name: string; nameTh: string; location: string; province: string; description: string; image: string; tags: string[] }) => {
-    if (center) {
-      store.updateCenter(center.id, data);
+  const saveCenter = (data: typeof EMPTY_CENTER) => {
+    if (drawer === "editCenter" && activeCenter) {
+      store.updateCenter(activeCenter.id, data);
     } else {
-      store.createCenter({ ...data, ownerId: user.id });
+      const newCenter = store.createCenter({ ...data, ownerId: user.id });
+      setActiveCenterId(newCenter.id);
     }
     setDrawer("none");
     setCenterExpanded(false);
   };
 
-  const saveWorkshop = (data: { title: string; titleTh: string; category: string; description: string; image: string; duration: string; maxParticipants: number; price: number; difficulty: UserWorkshop["difficulty"]; instructor: string; whatYouLearn: string[]; tags: string[] }) => {
-    if (!center) return;
+  const requestSaveWorkshop = (data: typeof EMPTY_ACT) => {
+    if (editingWorkshop) {
+      setPendingWorkshopUpdate(data);
+    } else {
+      executeSaveWorkshop(data);
+    }
+  };
+
+  const executeSaveWorkshop = (data: typeof EMPTY_ACT) => {
+    if (!activeCenter) return;
     if (editingWorkshop) {
       store.updateWorkshop(editingWorkshop.id, data);
+      store.generateWeeklySessions(editingWorkshop.id);
       setEditingWorkshop(null);
     } else {
-      store.createWorkshop({ ...data, centerId: center.id, ownerId: user.id });
+      const newWorkshop = store.createWorkshop({ ...data, centerId: activeCenter.id, ownerId: user.id });
+      if (newWorkshop.recurringDays && newWorkshop.recurringDays.length > 0) {
+        store.generateWeeklySessions(newWorkshop.id);
+      }
     }
+    setPendingWorkshopUpdate(null);
     setDrawer("none");
   };
 
@@ -347,22 +647,75 @@ export function MyCenterPage() {
         className="py-10 px-4"
         style={{ background: "linear-gradient(135deg, #78350f 0%, #b45309 100%)" }}
       >
-        <div className="max-w-4xl mx-auto">
-          <div className="flex items-center gap-3 mb-2">
-            <div className="w-10 h-10 rounded-xl bg-white/10 flex items-center justify-center">
-              <Building2 className="w-5 h-5 text-white" />
-            </div>
+        <div className="max-w-4xl mx-auto flex items-center justify-between">
+          <div className="flex items-center gap-4 mb-2">
+            {activeCenter && (
+              <button 
+                onClick={() => { setActiveCenterId(null); setDrawer("none"); }}
+                className="w-10 h-10 rounded-xl bg-white/10 hover:bg-white/20 flex items-center justify-center text-white transition-colors"
+                title="Back to All Centers"
+              >
+                <ArrowLeft className="w-5 h-5 text-white" />
+              </button>
+            )}
+            {!activeCenter && (
+              <div className="w-10 h-10 rounded-xl bg-white/10 flex items-center justify-center">
+                <Building2 className="w-5 h-5 text-white" />
+              </div>
+            )}
             <div>
-              <h1 className="text-2xl font-bold text-white">My Center</h1>
-              <p className="text-amber-200 text-sm">Manage your cultural learning center</p>
+              <h1 className="text-2xl font-bold text-white">
+                {activeCenter ? activeCenter.name : "My Centers"}
+              </h1>
+              <p className="text-amber-200 text-sm">
+                {activeCenter ? "Manage your cultural learning center" : "Manage your cultural learning centers"}
+              </p>
             </div>
           </div>
+          {!activeCenter && Object.keys(centers).length > 0 && drawer !== "createCenter" && (
+            <button
+              onClick={() => setDrawer("createCenter")}
+              className="flex items-center gap-2 px-4 py-2 bg-white text-amber-700 hover:bg-stone-50 rounded-xl text-sm font-medium shadow-sm transition-colors"
+            >
+              <Plus className="w-4 h-4" /> Add Center
+            </button>
+          )}
         </div>
       </div>
 
       <div className="max-w-4xl mx-auto px-4 py-8">
+        {/* ── Centers List Dashboard ─────────────────────────────────── */}
+        {!activeCenter && drawer === "none" && centers.length > 0 && (
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            {centers.map(c => (
+              <div 
+                key={c.id} 
+                onClick={() => setActiveCenterId(c.id)}
+                className="bg-white rounded-2xl border border-stone-100 shadow-sm overflow-hidden flex flex-col cursor-pointer hover:shadow-md hover:border-amber-200 transition-all group"
+              >
+                {c.images && c.images[0] ? (
+                  <img src={c.images[0]} alt={c.name} className="w-full h-32 object-cover" />
+                ) : (
+                  <div className="w-full h-32 bg-amber-50 flex items-center justify-center">
+                    <Building2 className="w-8 h-8 text-amber-300" />
+                  </div>
+                )}
+                <div className="p-4 flex-1 flex flex-col justify-between gap-3">
+                  <div>
+                    <h3 className="font-semibold text-stone-800 group-hover:text-amber-600 transition-colors">{c.name}</h3>
+                    <div className="flex items-center gap-1 text-xs text-stone-500 mt-1">
+                      <MapPin className="w-3.5 h-3.5" />{c.district}, {c.province}
+                    </div>
+                  </div>
+                  <div className="text-xs font-medium text-amber-600">Manage Center →</div>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+
         {/* ── No center yet ─────────────────────────────────── */}
-        {!center && drawer === "none" && (
+        {!activeCenter && drawer === "none" && centers.length === 0 && (
           <div className="bg-white rounded-2xl border border-dashed border-amber-200 p-12 flex flex-col items-center text-center">
             <div className="w-16 h-16 rounded-2xl bg-amber-50 flex items-center justify-center mb-4">
               <Building2 className="w-8 h-8 text-amber-400" />
@@ -372,7 +725,7 @@ export function MyCenterPage() {
               Create your cultural learning center to start adding workshops for guests to book.
             </p>
             <button
-              onClick={() => setDrawer("center")}
+              onClick={() => setDrawer("createCenter")}
               className="flex items-center gap-2 px-6 py-3 bg-amber-500 hover:bg-amber-600 text-white rounded-xl text-sm font-medium shadow-sm transition-colors"
             >
               <Plus className="w-4 h-4" /> Create My Center
@@ -381,7 +734,7 @@ export function MyCenterPage() {
         )}
 
         {/* ── Create center form ─────────────────────────────── */}
-        {!center && drawer === "center" && (
+        {!activeCenter && drawer === "createCenter" && (
           <div className="bg-white rounded-2xl border border-stone-100 shadow-sm p-6">
             <h2 className="text-lg font-semibold text-stone-800 mb-6 flex items-center gap-2">
               <Building2 className="w-5 h-5 text-amber-500" /> Create Your Center
@@ -391,29 +744,29 @@ export function MyCenterPage() {
         )}
 
         {/* ── Center dashboard ───────────────────────────────── */}
-        {center && (
+        {activeCenter && (
           <div className="flex flex-col gap-6">
             {/* Center info summary card */}
             <div className="bg-white rounded-2xl border border-stone-100 shadow-sm overflow-hidden">
               <div className="flex items-center justify-between px-6 py-4 border-b border-stone-50">
                 <div className="flex items-center gap-3">
-                  {center.image ? (
-                    <img src={center.image} alt={center.name} className="w-12 h-12 rounded-xl object-cover" />
+                  {activeCenter.images && activeCenter.images[0] ? (
+                    <img src={activeCenter.images[0]} alt={activeCenter.name} className="w-12 h-12 rounded-xl object-cover" />
                   ) : (
                     <div className="w-12 h-12 rounded-xl bg-amber-50 flex items-center justify-center">
                       <Building2 className="w-6 h-6 text-amber-400" />
                     </div>
                   )}
                   <div>
-                    <h2 className="font-semibold text-stone-800">{center.name}</h2>
+                    <h2 className="font-semibold text-stone-800">{activeCenter.name}</h2>
                     <div className="flex items-center gap-1 text-xs text-stone-400">
-                      <MapPin className="w-3 h-3" />{center.location}, {center.province}
+                      <MapPin className="w-3 h-3" />{activeCenter.district}, {activeCenter.province}
                     </div>
                   </div>
                 </div>
                 <div className="flex items-center gap-2">
                   <button
-                    onClick={() => { setDrawer("center"); setCenterExpanded(true); }}
+                    onClick={() => { setDrawer("editCenter"); setCenterExpanded(true); }}
                     className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-stone-200 text-stone-600 hover:bg-stone-50 text-xs transition-colors"
                   >
                     <Pencil className="w-3.5 h-3.5" /> Edit
@@ -427,24 +780,24 @@ export function MyCenterPage() {
                 </div>
               </div>
 
-              {centerExpanded && drawer !== "center" && (
-                <div className="px-6 py-4 text-sm text-stone-600">
-                  <p className="mb-3">{center.description}</p>
-                  {center.tags.length > 0 && (
-                    <div className="flex flex-wrap gap-1.5">
-                      {center.tags.map((t) => (
-                        <span key={t} className="px-2.5 py-0.5 bg-amber-50 text-amber-700 border border-amber-100 rounded-full text-xs">{t}</span>
+              {centerExpanded && drawer !== "editCenter" && (
+                <div className="px-6 py-4 text-sm text-stone-600 flex flex-col gap-4">
+                  <p>{activeCenter.description}</p>
+                  {activeCenter.images && activeCenter.images.length > 0 && (
+                    <div className="flex gap-2 overflow-x-auto">
+                      {activeCenter.images.map((img, i) => (
+                        <img key={i} src={img} alt={`${activeCenter.name} preview`} className="w-24 h-24 object-cover rounded-xl border border-stone-100 shrink-0" />
                       ))}
                     </div>
                   )}
                 </div>
               )}
 
-              {drawer === "center" && (
+              {drawer === "editCenter" && (
                 <div className="px-6 py-5 border-t border-stone-50">
                   <h3 className="text-sm font-semibold text-stone-700 mb-4">Edit Center Info</h3>
                   <CenterForm
-                    initial={{ name: center.name, nameTh: center.nameTh, location: center.location, province: center.province, description: center.description, image: center.image, tags: center.tags }}
+                    initial={activeCenter}
                     onSave={saveCenter}
                     onCancel={() => setDrawer("none")}
                   />
@@ -480,16 +833,18 @@ export function MyCenterPage() {
                         titleTh: editingWorkshop.titleTh,
                         category: editingWorkshop.category,
                         description: editingWorkshop.description,
-                        image: editingWorkshop.image,
+                        images: editingWorkshop.images,
                         duration: editingWorkshop.duration,
                         maxParticipants: editingWorkshop.maxParticipants,
                         price: editingWorkshop.price,
-                        difficulty: editingWorkshop.difficulty,
-                        instructor: editingWorkshop.instructor,
-                        whatYouLearn: editingWorkshop.whatYouLearn,
-                        tags: editingWorkshop.tags,
+                        recurringDays: editingWorkshop.recurringDays,
+                        sessionType: editingWorkshop.sessionType,
+                        sessionRounds: editingWorkshop.sessionRounds,
+                        defaultActivityName: editingWorkshop.defaultActivityName,
+                        defaultActivityDescription: editingWorkshop.defaultActivityDescription,
+                        defaultRegistrationCapacity: editingWorkshop.defaultRegistrationCapacity,
                       } : undefined}
-                      onSave={saveWorkshop}
+                      onSave={requestSaveWorkshop}
                       onCancel={() => { setDrawer("none"); setEditingWorkshop(null); }}
                     />
                   </div>
@@ -539,24 +894,75 @@ export function MyCenterPage() {
               <div className="bg-white rounded-2xl border border-stone-100 shadow-sm p-6">
                 <h3 className="text-base font-semibold text-stone-800 mb-5">Center Details</h3>
                 <dl className="flex flex-col gap-4 text-sm">
-                  <div><dt className="text-xs font-medium text-stone-400 uppercase tracking-wide mb-0.5">Name (EN)</dt><dd className="text-stone-800">{center.name}</dd></div>
-                  {center.nameTh && <div><dt className="text-xs font-medium text-stone-400 uppercase tracking-wide mb-0.5">ชื่อภาษาไทย</dt><dd className="text-stone-800">{center.nameTh}</dd></div>}
-                  <div><dt className="text-xs font-medium text-stone-400 uppercase tracking-wide mb-0.5">Location</dt><dd className="text-stone-800">{center.location}, {center.province}</dd></div>
-                  <div><dt className="text-xs font-medium text-stone-400 uppercase tracking-wide mb-0.5">Description</dt><dd className="text-stone-600 leading-relaxed">{center.description}</dd></div>
-                  {center.tags.length > 0 && (
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div><dt className="text-xs font-medium text-stone-400 uppercase tracking-wide mb-0.5">Center Name</dt><dd className="text-stone-800">{activeCenter.name}</dd></div>
+                    {activeCenter.nameTh && <div><dt className="text-xs font-medium text-stone-400 uppercase tracking-wide mb-0.5">ชื่อภาษาไทย</dt><dd className="text-stone-800">{activeCenter.nameTh}</dd></div>}
+                  </div>
+                  <div>
+                    <dt className="text-xs font-medium text-stone-400 uppercase tracking-wide mb-0.5">Location</dt>
+                    <dd className="text-stone-800">
+                      {activeCenter.subDistrict}, {activeCenter.district}, {activeCenter.province}
+                      {activeCenter.locationLink && <a href={activeCenter.locationLink} target="_blank" rel="noreferrer" className="text-amber-600 hover:underline ml-2">(Map)</a>}
+                    </dd>
+                  </div>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div>
-                      <dt className="text-xs font-medium text-stone-400 uppercase tracking-wide mb-1.5">Tags</dt>
-                      <dd className="flex flex-wrap gap-1.5">
-                        {center.tags.map((t) => <span key={t} className="px-2.5 py-0.5 bg-amber-50 text-amber-700 border border-amber-100 rounded-full text-xs">{t}</span>)}
+                      <dt className="text-xs font-medium text-stone-400 uppercase tracking-wide mb-0.5">Contact</dt>
+                      <dd className="text-stone-800 flex flex-col gap-1">
+                        {activeCenter.telephones?.length > 0 && <span>Tel: {activeCenter.telephones.join(", ")}</span>}
+                        {activeCenter.email && <span>Email: {activeCenter.email}</span>}
+                        {activeCenter.lineId && <span>Line: {activeCenter.lineId}</span>}
                       </dd>
                     </div>
-                  )}
+                    <div>
+                      <dt className="text-xs font-medium text-stone-400 uppercase tracking-wide mb-0.5">Social & Web</dt>
+                      <dd className="text-stone-800 flex flex-col gap-1">
+                        {activeCenter.facebook && <span>Facebook: {activeCenter.facebook}</span>}
+                        {activeCenter.website && <span>Website: <a href={activeCenter.website} target="_blank" rel="noreferrer" className="text-amber-600 hover:underline">{activeCenter.website}</a></span>}
+                      </dd>
+                    </div>
+                  </div>
+                  <div>
+                    <dt className="text-xs font-medium text-stone-400 uppercase tracking-wide mb-0.5">Community Leader</dt>
+                    <dd className="text-stone-800">
+                      {`${activeCenter.communityLeaderFirstName || ''} ${activeCenter.communityLeaderLastName || ''}`.trim() || 'N/A'}
+                      {activeCenter.communityLeaderTelephone && <div className="text-stone-500 mt-0.5">Tel: {activeCenter.communityLeaderTelephone}</div>}
+                    </dd>
+                  </div>
+                  <div><dt className="text-xs font-medium text-stone-400 uppercase tracking-wide mb-0.5">Description</dt><dd className="text-stone-600 leading-relaxed">{activeCenter.description}</dd></div>
                 </dl>
               </div>
             )}
           </div>
         )}
       </div>
+
+      {pendingWorkshopUpdate && (
+        <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
+          <div className="bg-white rounded-2xl w-full max-w-sm overflow-hidden shadow-xl animate-in fade-in zoom-in-95 duration-200">
+            <div className="p-5 border-b border-stone-100">
+              <h3 className="text-lg font-bold text-stone-800">Update Settings?</h3>
+            </div>
+            <div className="p-5 text-sm text-stone-600 bg-stone-50/50 leading-relaxed">
+              <p>These changes will be applied to next week's schedule. The current week's activities will remain unchanged. Do you wish to proceed?</p>
+            </div>
+            <div className="p-4 bg-white flex gap-3 justify-end items-center border-t border-stone-100">
+              <button 
+                onClick={() => setPendingWorkshopUpdate(null)} 
+                className="px-4 py-2 text-sm font-medium text-stone-600 hover:bg-stone-100 rounded-xl transition-colors"
+              >
+                Cancel
+              </button>
+              <button 
+                onClick={() => executeSaveWorkshop(pendingWorkshopUpdate)} 
+                className="px-5 py-2 text-sm font-semibold text-white bg-amber-500 hover:bg-amber-600 rounded-xl shadow-sm transition-colors"
+              >
+                Proceed
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

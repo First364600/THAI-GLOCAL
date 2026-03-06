@@ -8,6 +8,8 @@ export interface UserProfile {
   phone?: string;
   bio?: string;
   avatar?: string;
+  role?: "user" | "center" | "admin" | "super_admin";
+  status?: "active" | "suspended";
 }
 
 interface AuthState {
@@ -29,10 +31,24 @@ const useAuthStore = create<AuthState>()(
         if (password.length < 6) throw new Error("Invalid email or password.");
 
         // Check localStorage for a registered user
-        const stored = localStorage.getItem("tg_users");
-        const users: (UserProfile & { password: string })[] = stored ? JSON.parse(stored) : [];
+        let stored = localStorage.getItem("tg_users");
+        let users: (UserProfile & { password: string })[] = [];
+        if (stored) {
+          users = JSON.parse(stored);
+        } 
+        
+        // Ensure default admin exists even if there are other users
+        if (!users.find(u => u.email === "admin@tg.com")) {
+          const defaultAdmin = {
+            id: "u-super", name: "Super Admin", email: "admin@tg.com", password: "password", role: "super_admin" as const, status: "active" as const
+          };
+          users.push(defaultAdmin);
+          localStorage.setItem("tg_users", JSON.stringify(users));
+        }
+
         const found = users.find((u) => u.email.toLowerCase() === email.toLowerCase());
         if (!found || found.password !== password) throw new Error("Invalid email or password.");
+        if (found.status === "suspended") throw new Error("This account is suspended.");
 
         const { password: _pw, ...profile } = found;
         set({ user: profile });

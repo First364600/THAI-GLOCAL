@@ -1,6 +1,7 @@
 import { Link } from "react-router";
 import { Clock, Users, Star, MapPin } from "lucide-react";
 import { Activity, centers } from "../data/mockData";
+import { ImageCarousel } from "./ImageCarousel";
 
 interface WorkshopCardProps {
   activity: Activity;
@@ -20,23 +21,16 @@ export function WorkshopCard({ activity, compact = false }: WorkshopCardProps) {
     "Culinary Arts": "bg-rose-100 text-rose-700",
   };
 
-  const difficultyColors: Record<string, string> = {
-    Beginner: "text-green-600",
-    Intermediate: "text-amber-600",
-    Advanced: "text-rose-600",
-  };
-
   return (
     <Link to={`/workshops/${activity.id}`} className="group block">
       <div className="bg-white rounded-2xl overflow-hidden border border-stone-100 hover:border-amber-200 shadow-sm hover:shadow-lg transition-all duration-300 h-full flex flex-col">
         {/* Image */}
-        <div className="relative overflow-hidden" style={{ height: compact ? "180px" : "220px" }}>
-          <img
-            src={activity.image}
+        <div className="relative overflow-hidden group-hover:[&>div>img]:scale-105" style={{ height: compact ? "180px" : "220px" }}>
+          <ImageCarousel
+            images={activity.images || []}
             alt={activity.title}
-            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
           />
-          <div className="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent" />
+          <div className="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent pointer-events-none" />
           {/* Category badge */}
           <div className="absolute top-3 left-3">
             <span className={`px-2.5 py-1 rounded-full text-xs font-medium ${categoryColors[activity.category] || "bg-stone-100 text-stone-600"}`}>
@@ -83,9 +77,6 @@ export function WorkshopCard({ activity, compact = false }: WorkshopCardProps) {
             <span className="flex items-center gap-1">
               <Users className="w-3.5 h-3.5" />
               Max {activity.maxParticipants}
-            </span>
-            <span className={`ml-auto font-medium ${difficultyColors[activity.difficulty]}`}>
-              {activity.difficulty}
             </span>
           </div>
 

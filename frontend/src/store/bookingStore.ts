@@ -5,6 +5,9 @@ interface BookingState {
   bookings: Booking[];
   addBooking: (booking: Booking) => void;
   cancelBooking: (bookingId: string) => void;
+  requestCancellation: (bookingId: string, requestedBy: "participant" | "center") => void;
+  approveCancellation: (bookingId: string) => void;
+  rejectCancellation: (bookingId: string) => void;
 }
 
 const useBookingStore = create<BookingState>((set) => ({
@@ -29,6 +32,30 @@ const useBookingStore = create<BookingState>((set) => ({
     set((state) => ({
       bookings: state.bookings.map((b) =>
         b.id === bookingId ? { ...b, status: "cancelled" } : b
+      ),
+    })),
+  requestCancellation: (bookingId, requestedBy) =>
+    set((state) => ({
+      bookings: state.bookings.map((b) =>
+        b.id === bookingId
+          ? { ...b, status: "cancellation_requested", cancelRequestedBy: requestedBy }
+          : b
+      ),
+    })),
+  approveCancellation: (bookingId) =>
+    set((state) => ({
+      bookings: state.bookings.map((b) =>
+        b.id === bookingId
+          ? { ...b, status: "cancelled", cancelRequestedBy: undefined }
+          : b
+      ),
+    })),
+  rejectCancellation: (bookingId) =>
+    set((state) => ({
+      bookings: state.bookings.map((b) =>
+        b.id === bookingId
+          ? { ...b, status: "confirmed", cancelRequestedBy: undefined }
+          : b
       ),
     })),
 }));

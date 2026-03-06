@@ -4,7 +4,7 @@ import {
   Clock,
   Users,
   MapPin,
-  Star,
+  Calendar,
   ChevronLeft,
   CheckCircle2,
   AlertCircle,
@@ -18,6 +18,7 @@ import {
 import { activities, centers, Session } from "../data/mockData";
 import useBookingStore from "../store/bookingStore";
 import { toast } from "sonner";
+import { ImageCarousel } from "../components/ImageCarousel";
 
 function BookingModal({
   session,
@@ -307,10 +308,119 @@ function BookingSuccessModal({
   );
 }
 
+function ActivityDetailModal({
+  session,
+  activityTitle,
+  onClose,
+  onBook,
+}: {
+  session: Session;
+  activityTitle: string;
+  onClose: () => void;
+  onBook: () => void;
+}) {
+  const currentDate = new Date('2026-03-07'); // System current date
+  const sessionDate = new Date(session.date);
+  const timeDiff = sessionDate.getTime() - currentDate.getTime();
+  const daysUntil = Math.ceil(timeDiff / (1000 * 3600 * 24));
+  
+  const isBookingClosed = daysUntil < 2;
+  const isFullyBooked = session.availableSpots === 0;
+  const isDisabled = isFullyBooked || isBookingClosed;
+
+  let buttonText = "Reserve this Activity";
+  if (isFullyBooked) buttonText = "Fully Booked";
+  else if (isBookingClosed) buttonText = "Booking Closed (Starts soon)";
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
+      <div className="bg-white rounded-2xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-hidden flex flex-col">
+        {/* Header */}
+        <div className="flex items-center justify-between p-6 border-b border-stone-100 shrink-0">
+          <div>
+            <h2 className="text-xl font-bold text-stone-900 leading-tight mb-1">
+              Activity Details
+            </h2>
+            <p className="text-stone-500 text-sm">
+              {activityTitle}
+            </p>
+          </div>
+          <button onClick={onClose} className="p-2 -mr-2 rounded-xl text-stone-400 hover:bg-stone-100 transition-colors">
+            <X className="w-5 h-5" />
+          </button>
+        </div>
+
+        {/* Content */}
+        <div className="p-6 overflow-y-auto flex flex-col gap-6">
+          <div>
+            <h3 className="text-2xl font-bold text-stone-900 mb-2">{session.name || "Workshop Activity"}</h3>
+            <p className="text-stone-600 leading-relaxed text-sm">
+              {session.description || "Join us for a wonderful experience learning the fundamentals and advancing your skills in a practical environment."}
+            </p>
+          </div>
+          
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+             <div className="bg-stone-50 p-4 rounded-xl border border-stone-100 flex items-start gap-3">
+               <Calendar className="w-5 h-5 text-amber-500 shrink-0 mt-0.5" />
+               <div>
+                 <p className="text-xs font-semibold text-stone-500 uppercase tracking-wider mb-1">Date</p>
+                 <p className="text-stone-900 font-medium text-sm">
+                   {new Date(session.date).toLocaleDateString("en-US", { weekday: "long", year: "numeric", month: "long", day: "numeric" })}
+                 </p>
+               </div>
+             </div>
+             <div className="bg-stone-50 p-4 rounded-xl border border-stone-100 flex items-start gap-3">
+               <Clock className="w-5 h-5 text-amber-500 shrink-0 mt-0.5" />
+               <div>
+                 <p className="text-xs font-semibold text-stone-500 uppercase tracking-wider mb-1">Time</p>
+                 <p className="text-stone-900 font-medium text-sm">{session.time}</p>
+               </div>
+             </div>
+             <div className="bg-stone-50 p-4 rounded-xl border border-stone-100 flex items-start gap-3 sm:col-span-2">
+               <Users className="w-5 h-5 text-amber-500 shrink-0 mt-0.5" />
+               <div>
+                 <p className="text-xs font-semibold text-stone-500 uppercase tracking-wider mb-1">Availability</p>
+                 <p className="text-stone-900 font-medium text-sm">
+                   {session.availableSpots === 0 
+                     ? "This session is fully booked." 
+                     : `${session.availableSpots} spots left (out of ${session.totalSpots} total)`
+                   }
+                  </p>
+               </div>
+             </div>
+          </div>
+        </div>
+
+        {/* Footer */}
+        <div className="p-5 border-t border-stone-100 bg-stone-50 flex flex-wrap items-center justify-end gap-3 shrink-0">
+          {isBookingClosed && !isFullyBooked && (
+            <p className="text-red-500 text-xs mr-auto">
+              Bookings close 2 days before the activity start date.
+            </p>
+          )}
+          <button
+            onClick={onClose}
+            className="px-6 py-2.5 rounded-xl border border-stone-200 bg-white text-stone-600 hover:bg-stone-50 transition-colors font-medium text-sm"
+          >
+            Close
+          </button>
+          <button
+            onClick={onBook}
+            disabled={isDisabled}
+            className="px-8 py-2.5 bg-amber-500 hover:bg-amber-600 disabled:bg-stone-200 disabled:text-stone-400 text-white rounded-xl transition-colors font-medium text-sm flex gap-2 items-center"
+          >
+            {buttonText}
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 export function WorkshopDetailPage() {
   const { id } = useParams<{ id: string }>();
   const activity = activities.find((a) => a.id === id);
-  const [selectedSession, setSelectedSession] = useState<Session | null>(null);
+  const [detailSession, setDetailSession] = useState<Session | null>(null);
   const [bookingSession, setBookingSession] = useState<Session | null>(null);
   const [successBookingId, setSuccessBookingId] = useState<string | null>(null);
   const [successSession, setSuccessSession] = useState<Session | null>(null);
@@ -330,12 +440,6 @@ export function WorkshopDetailPage() {
   }
 
   const center = centers.find((c) => c.id === activity.centerId);
-
-  const difficultyColors: Record<string, string> = {
-    Beginner: "bg-green-100 text-green-700",
-    Intermediate: "bg-amber-100 text-amber-700",
-    Advanced: "bg-rose-100 text-rose-700",
-  };
 
   const spotsColor = (available: number, total: number) => {
     const ratio = available / total;
@@ -361,28 +465,20 @@ export function WorkshopDetailPage() {
         {/* Left: Main Content */}
         <div className="lg:col-span-2 flex flex-col gap-6">
           {/* Hero Image */}
-          <div className="rounded-2xl overflow-hidden" style={{ height: "340px" }}>
-            <img
-              src={activity.image}
+          <div className="rounded-2xl overflow-hidden group/main-carousel" style={{ height: "340px" }}>
+            <ImageCarousel
+              images={activity.images || []}
               alt={activity.title}
-              className="w-full h-full object-cover"
+              className="w-full h-full"
             />
           </div>
 
           {/* Title & meta */}
           <div>
             <div className="flex flex-wrap items-center gap-2 mb-3">
-              <span className={`px-2.5 py-1 rounded-full text-xs font-medium ${difficultyColors[activity.difficulty]}`}>
-                {activity.difficulty}
-              </span>
               <span className="px-2.5 py-1 rounded-full text-xs font-medium bg-stone-100 text-stone-600">
                 {activity.category}
               </span>
-              {activity.tags.map((tag) => (
-                <span key={tag} className="px-2.5 py-1 rounded-full text-xs bg-amber-50 text-amber-600">
-                  {tag}
-                </span>
-              ))}
             </div>
             <h1 className="text-stone-900 mb-1" style={{ fontSize: "clamp(1.5rem, 3vw, 2rem)", fontWeight: 700 }}>
               {activity.title}
@@ -414,49 +510,6 @@ export function WorkshopDetailPage() {
             </p>
           </div>
 
-          {/* What you'll learn */}
-          <div className="bg-white rounded-2xl p-6 border border-stone-100">
-            <h2 className="text-stone-900 mb-4" style={{ fontWeight: 600 }}>What You'll Learn</h2>
-            <ul className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-              {activity.whatYouLearn.map((item, i) => (
-                <li key={i} className="flex items-start gap-2">
-                  <CheckCircle2 className="w-4 h-4 text-green-500 mt-0.5 flex-shrink-0" />
-                  <span className="text-stone-600" style={{ fontSize: "0.875rem" }}>{item}</span>
-                </li>
-              ))}
-            </ul>
-          </div>
-
-          {/* What to bring */}
-          <div className="bg-white rounded-2xl p-6 border border-stone-100">
-            <h2 className="text-stone-900 mb-4" style={{ fontWeight: 600 }}>What to Bring</h2>
-            <ul className="flex flex-col gap-2">
-              {activity.whatToBring.map((item, i) => (
-                <li key={i} className="flex items-start gap-2">
-                  <AlertCircle className="w-4 h-4 text-amber-500 mt-0.5 flex-shrink-0" />
-                  <span className="text-stone-600" style={{ fontSize: "0.875rem" }}>{item}</span>
-                </li>
-              ))}
-            </ul>
-          </div>
-
-          {/* Instructor */}
-          <div className="bg-white rounded-2xl p-6 border border-stone-100">
-            <h2 className="text-stone-900 mb-4" style={{ fontWeight: 600 }}>Your Instructor</h2>
-            <div className="flex items-start gap-4">
-              <div className="w-12 h-12 rounded-full bg-amber-100 flex items-center justify-center flex-shrink-0">
-                <User className="w-6 h-6 text-amber-600" />
-              </div>
-              <div>
-                <p className="text-stone-900 font-medium" style={{ fontSize: "0.95rem" }}>
-                  {activity.instructor}
-                </p>
-                <p className="text-stone-500 mt-1" style={{ fontSize: "0.85rem", lineHeight: 1.7 }}>
-                  {activity.instructorBio}
-                </p>
-              </div>
-            </div>
-          </div>
         </div>
 
         {/* Right: Booking Panel */}
@@ -476,88 +529,65 @@ export function WorkshopDetailPage() {
               </div>
 
               <div className="p-5">
-                <h3 className="text-stone-900 mb-4 font-medium">Available Sessions</h3>
-                <div className="flex flex-col gap-2 mb-5">
+                <h3 className="text-stone-900 mb-4 font-medium">Activity List</h3>
+                <div className="flex flex-col gap-3 mb-5">
                   {activity.sessions.map((session) => {
-                    const isSelected = selectedSession?.id === session.id;
                     const isFull = session.availableSpots === 0;
                     return (
                       <button
                         key={session.id}
-                        disabled={isFull}
-                        onClick={() => setSelectedSession(isSelected ? null : session)}
-                        className={`w-full p-3 rounded-xl border text-left transition-all ${
-                          isFull
-                            ? "bg-stone-50 border-stone-100 opacity-50 cursor-not-allowed"
-                            : isSelected
-                            ? "border-amber-400 bg-amber-50"
-                            : "border-stone-200 hover:border-amber-300 hover:bg-amber-50/50"
-                        }`}
+                        onClick={() => setDetailSession(session)}
+                        className="w-full p-4 rounded-xl border text-left transition-all border-stone-200 hover:border-amber-300 hover:bg-amber-50/50 group block"
                       >
-                        <div className="flex items-center justify-between">
-                          <div>
-                            <p className="text-stone-800 font-medium" style={{ fontSize: "0.875rem" }}>
-                              {new Date(session.date).toLocaleDateString("en-US", {
-                                weekday: "short",
-                                month: "short",
-                                day: "numeric",
-                              })}
-                            </p>
-                            <p className="text-stone-500" style={{ fontSize: "0.75rem" }}>
-                              {session.time}
-                            </p>
-                          </div>
-                          <div className="text-right">
+                        <div className="flex flex-col gap-1.5">
+                          <div className="flex items-start justify-between gap-2">
+                            <h4 className="text-stone-900 font-semibold leading-tight text-sm group-hover:text-amber-700 transition-colors">
+                              {session.name || "Workshop Activity"}
+                            </h4>
                             <p
-                              className={`font-medium ${spotsColor(session.availableSpots, session.totalSpots)}`}
+                              className={`font-medium shrink-0 ${spotsColor(session.availableSpots, session.totalSpots)}`}
                               style={{ fontSize: "0.75rem" }}
                             >
-                              {isFull ? "Full" : `${session.availableSpots} left`}
-                            </p>
-                            <p className="text-stone-400" style={{ fontSize: "0.7rem" }}>
-                              / {session.totalSpots}
+                              {isFull ? "Full" : `${session.availableSpots} spots left`}
                             </p>
                           </div>
-                        </div>
-                        {/* Progress bar */}
-                        <div className="mt-2 h-1 rounded-full bg-stone-100 overflow-hidden">
-                          <div
-                            className={`h-full rounded-full transition-all ${
-                              isFull
-                                ? "bg-red-300"
-                                : session.availableSpots / session.totalSpots <= 0.3
-                                ? "bg-orange-400"
-                                : "bg-green-400"
-                            }`}
-                            style={{
-                              width: `${((session.totalSpots - session.availableSpots) / session.totalSpots) * 100}%`,
-                            }}
-                          />
+                          <div className="flex items-center justify-between text-stone-500" style={{ fontSize: "0.8rem" }}>
+                            <span>
+                              {new Date(session.date).toLocaleDateString("en-US", { weekday: "short", month: "short", day: "numeric" })} · {session.time}
+                            </span>
+                            <span>
+                              {session.totalSpots - session.availableSpots}/{session.totalSpots} Booked
+                            </span>
+                          </div>
+                          {/* Progress bar */}
+                          <div className="mt-1 h-1 rounded-full bg-stone-200 overflow-hidden">
+                            <div
+                              className={`h-full rounded-full transition-all ${
+                                isFull
+                                  ? "bg-red-400"
+                                  : session.availableSpots / session.totalSpots <= 0.3
+                                  ? "bg-orange-400"
+                                  : "bg-green-400"
+                              }`}
+                              style={{
+                                width: `${((session.totalSpots - session.availableSpots) / session.totalSpots) * 100}%`,
+                              }}
+                            />
+                          </div>
+                          <div className="mt-2 text-amber-600 font-medium text-xs flex justify-end opacity-0 group-hover:opacity-100 transition-opacity">
+                            View Details →
+                          </div>
                         </div>
                       </button>
                     );
                   })}
                 </div>
 
-                <button
-                  onClick={() => {
-                    if (!selectedSession) {
-                      toast.error("Please select a session first");
-                      return;
-                    }
-                    setBookingSession(selectedSession);
-                  }}
-                  disabled={!selectedSession}
-                  className="w-full py-3 bg-amber-500 hover:bg-amber-600 disabled:bg-stone-200 disabled:text-stone-400 text-white rounded-xl transition-colors font-medium"
-                >
-                  {selectedSession ? "Book This Session" : "Select a Session"}
-                </button>
-
                 {center && (
                   <div className="mt-4 pt-4 border-t border-stone-100">
                     <div className="flex items-center gap-2">
                       <img
-                        src={center.image}
+                        src={center.images?.[0] || ""}
                         alt={center.name}
                         className="w-8 h-8 rounded-lg object-cover"
                       />
@@ -565,12 +595,7 @@ export function WorkshopDetailPage() {
                         <p className="text-stone-800 font-medium" style={{ fontSize: "0.75rem" }}>
                           {center.name}
                         </p>
-                        <div className="flex items-center gap-1">
-                          <Star className="w-3 h-3 fill-amber-400 text-amber-400" />
-                          <span className="text-stone-500" style={{ fontSize: "0.7rem" }}>
-                            {center.rating} · {center.location}
-                          </span>
-                        </div>
+                        <span className="text-stone-500" style={{ fontSize: "0.7rem" }}>{center.location}</span>
                       </div>
                     </div>
                   </div>
@@ -580,6 +605,19 @@ export function WorkshopDetailPage() {
           </div>
         </div>
       </div>
+
+      {/* Activity Detail Modal */}
+      {detailSession && (
+        <ActivityDetailModal
+          session={detailSession}
+          activityTitle={activity.title}
+          onClose={() => setDetailSession(null)}
+          onBook={() => {
+            setDetailSession(null);
+            setBookingSession(detailSession);
+          }}
+        />
+      )}
 
       {/* Booking Modal */}
       {bookingSession && (

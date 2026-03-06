@@ -2,6 +2,7 @@ import { useParams, Link } from "react-router";
 import { MapPin, Star, ChevronLeft } from "lucide-react";
 import { centers, activities } from "../data/mockData";
 import { WorkshopCard } from "../components/WorkshopCard";
+import { ImageCarousel } from "../components/ImageCarousel";
 
 export function CentersPage() {
   const centerList = centers;
@@ -30,19 +31,12 @@ export function CentersPage() {
                 className="group bg-white rounded-2xl overflow-hidden border border-stone-100 hover:shadow-xl transition-all hover:-translate-y-1"
               >
                 {/* Image */}
-                <div className="relative overflow-hidden" style={{ height: "200px" }}>
-                  <img
-                    src={center.image}
+                <div className="relative overflow-hidden group-hover:[&>div>img]:scale-105" style={{ height: "200px" }}>
+                  <ImageCarousel
+                    images={center.images || []}
                     alt={center.name}
-                    className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
                   />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
-                  <div className="absolute top-3 right-3 flex items-center gap-1 bg-white/90 backdrop-blur-sm rounded-full px-2.5 py-1">
-                    <Star className="w-3.5 h-3.5 fill-amber-400 text-amber-400" />
-                    <span className="font-semibold text-stone-800" style={{ fontSize: "0.8rem" }}>
-                      {center.rating}
-                    </span>
-                  </div>
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent pointer-events-none" />
                   <div className="absolute bottom-3 left-3 right-3">
                     <div className="flex flex-wrap gap-1.5">
                       {center.tags.slice(0, 3).map((tag) => (
@@ -129,8 +123,8 @@ export function CenterDetailPage() {
 
       {/* Hero */}
       <div className="relative mb-8" style={{ height: "280px" }}>
-        <img src={center.image} alt={center.name} className="w-full h-full object-cover" />
-        <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent" />
+        <ImageCarousel images={center.images || []} alt={center.name} className="w-full h-full" />
+        <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent pointer-events-none" />
         <div className="absolute bottom-0 left-0 right-0 max-w-6xl mx-auto px-4 pb-6">
           <div className="flex flex-wrap gap-1.5 mb-2">
             {center.tags.map((tag) => (
@@ -149,9 +143,6 @@ export function CenterDetailPage() {
           <div className="flex flex-wrap items-center gap-4 text-white/80" style={{ fontSize: "0.875rem" }}>
             <span className="flex items-center gap-1">
               <MapPin className="w-4 h-4" /> {center.location}, {center.province}
-            </span>
-            <span className="flex items-center gap-1">
-              <Star className="w-4 h-4 fill-amber-400 text-amber-400" /> {center.rating}
             </span>
 
           </div>

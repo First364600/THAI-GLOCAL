@@ -167,9 +167,9 @@ export function HomePage() {
             {centers.map((center) => (
               <Link key={center.id} to={`/centers/${center.id}`} className="group">
                 <div className="bg-white rounded-2xl overflow-hidden border border-stone-100 hover:border-amber-200 shadow-sm hover:shadow-lg transition-all duration-300 flex">
-                  <div className="w-32 flex-shrink-0 overflow-hidden">
+                  <div className="w-32 flex-shrink-0 overflow-hidden group/mini-carousel">
                     <img
-                      src={center.image}
+                      src={center.images?.[0] || ""}
                       alt={center.name}
                       className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                     />
@@ -185,10 +185,6 @@ export function HomePage() {
                       <span className="flex items-center gap-1 text-stone-500">
                         <MapPin className="w-3.5 h-3.5 text-amber-400" />
                         {center.location}
-                      </span>
-                      <span className="flex items-center gap-1 text-amber-600 font-medium ml-auto">
-                        <Star className="w-3.5 h-3.5 fill-amber-400 text-amber-400" />
-                        {center.rating}
                       </span>
                     </div>
                     <div className="flex flex-wrap gap-1 mt-2">
