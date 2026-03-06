@@ -9,5 +9,5 @@ import com.thaiglocal.server.model.Center;
 
 @Repository
 public interface CenterRepository extends JpaRepository<Center, Long> {
-    List<Center> findByCenterNameContainingIgnoreCase(String keyword);
+    List<Center> findByCenterNameContainingIgnoreCase(String centerName);
 }

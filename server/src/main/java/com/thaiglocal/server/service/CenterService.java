@@ -56,6 +56,11 @@ public class CenterService {
         return mapToCenterResponseList(centers);
     }
 
+    public List<CenterResponse> searchCentersByName(String centerName) {
+        List<Center> centers = centerRepository.findByCenterNameContainingIgnoreCase(centerName);
+        return mapToCenterResponseList(centers);
+    }
+
     @Transactional
     public List<CenterResponse> getCenterByCenterAdminId(Long userId) {
         User user = userRepository.findById(userId)
