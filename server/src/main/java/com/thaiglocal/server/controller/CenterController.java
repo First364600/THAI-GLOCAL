@@ -48,8 +48,8 @@ public class CenterController {
         return ResponseEntity.ok(responses);
     }
 
-    // Method: POST /api/centers
-    @PostMapping
+    // Method: POST /api/centers/create
+    @PostMapping("/create")
     public ResponseEntity<Void> createCenter(@RequestBody CenterRequest request) {
         centerService.createCenter(request);
         return ResponseEntity.status(HttpStatus.CREATED).build(); // HTTP 201 Created
