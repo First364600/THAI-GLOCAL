@@ -11,16 +11,24 @@ import com.thaiglocal.server.dto.response.ActivityResponse;
 import com.thaiglocal.server.dto.response.WorkshopResponse;
 import com.thaiglocal.server.exception.NotFoundException;
 import com.thaiglocal.server.model.Activity;
+import com.thaiglocal.server.model.Center;
 import com.thaiglocal.server.model.Workshop;
 import com.thaiglocal.server.model.WorkshopImage;
+import com.thaiglocal.server.repository.CenterRepository;
 import com.thaiglocal.server.repository.WorkshopRepository;
 
 @Service
 public class WorkshopService {
     private final WorkshopRepository workshopRepository;
+    private final CenterRepository centerRepository;
 
-    public WorkshopService(WorkshopRepository workshopRepository) {
+    public WorkshopService(
+        WorkshopRepository workshopRepository,
+        CenterRepository centerRepository
+        )
+    {
         this.workshopRepository = workshopRepository;
+        this.centerRepository = centerRepository;
     }
 
     private WorkshopResponse mapToWorkshopResponse(Workshop workshop) {
@@ -96,6 +104,9 @@ public class WorkshopService {
 
     @Transactional
     public void createWorkshop(WorkshopCreateRequest request) {
+        Center center = centerRepository.findById(request.getCenterId())
+                .orElseThrow(() -> new NotFoundException("Center not found with id: " + request.getCenterId()));
+                
         Workshop workshop = Workshop.builder()
                 .workshopName(request.getWorkshopName())
                 .description(request.getDescription())
@@ -104,6 +115,9 @@ public class WorkshopService {
                 .workshopType(request.getWorkshopType())
                 .build();
 
+        center.addWorkshop(workshop); // Set the relationship between Center and Workshop
+
+        // Handle workshop images
         if (request.getWorkshopImages() != null && !request.getWorkshopImages().isEmpty()) {
             for (String imageUrl : request.getWorkshopImages()) {
                 WorkshopImage workshopImage = new WorkshopImage();
@@ -112,6 +126,7 @@ public class WorkshopService {
             }
         }
 
+        // Handle activities
         if (request.getActivities() != null && !request.getActivities().isEmpty()) {
             for (var activityRequest : request.getActivities()) {
                 Activity activities = Activity.builder()
@@ -127,6 +142,8 @@ public class WorkshopService {
                 workshop.addActivity(activities);
             }
         }
+
+        
         workshopRepository.save(workshop);
     }
 
