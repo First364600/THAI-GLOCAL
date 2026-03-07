@@ -19,6 +19,8 @@ import com.thaiglocal.server.dto.request.WorkshopUpdateRequest;
 import com.thaiglocal.server.dto.response.WorkshopResponse;
 import com.thaiglocal.server.service.WorkshopService;
 
+import jakarta.validation.Valid;
+
 @RestController
 @RequestMapping("/api/workshops")
 public class WorkshopController {
@@ -74,7 +76,7 @@ public class WorkshopController {
 
     // Method: POST /api/workshops/create
     @PostMapping("/create")
-    public ResponseEntity<Void> createWorkshop(@RequestBody WorkshopCreateRequest request) {
+    public ResponseEntity<Void> createWorkshop(@Valid @RequestBody WorkshopCreateRequest request) {
         workshopService.createWorkshop(request);
         return ResponseEntity.status(HttpStatus.CREATED).build(); // HTTP 201
     }
@@ -83,7 +85,7 @@ public class WorkshopController {
     @PatchMapping("/update/{workshopId}")
     public ResponseEntity<Void> updateWorkshop(
             @PathVariable Long workshopId,
-            @RequestBody WorkshopUpdateRequest request) {
+            @Valid @RequestBody WorkshopUpdateRequest request) {
         workshopService.updateWorkshop(workshopId, request);
         return ResponseEntity.ok().build(); // HTTP 200
     }

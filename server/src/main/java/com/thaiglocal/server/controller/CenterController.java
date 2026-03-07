@@ -18,6 +18,8 @@ import com.thaiglocal.server.dto.request.CenterRequest;
 import com.thaiglocal.server.dto.response.CenterResponse;
 import com.thaiglocal.server.service.CenterService;
 
+import jakarta.validation.Valid;
+
 @RestController
 @RequestMapping("/api/centers")
 public class CenterController {
@@ -57,7 +59,7 @@ public class CenterController {
 
     // Method: POST /api/centers/create
     @PostMapping("/create")
-    public ResponseEntity<Void> createCenter(@RequestBody CenterRequest request) {
+    public ResponseEntity<Void> createCenter(@Valid @RequestBody CenterRequest request) {
         centerService.createCenter(request);
         return ResponseEntity.status(HttpStatus.CREATED).build(); // HTTP 201 Created
     }
