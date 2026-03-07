@@ -3,8 +3,10 @@ package com.thaiglocal.server.service;
 import java.util.List;
 
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
-import com.thaiglocal.server.dto.request.WorkshopRequest;
+import com.thaiglocal.server.dto.request.WorkshopCreateRequest;
+import com.thaiglocal.server.dto.request.WorkshopUpdateRequest;
 import com.thaiglocal.server.dto.response.ActivityResponse;
 import com.thaiglocal.server.dto.response.WorkshopResponse;
 import com.thaiglocal.server.exception.NotFoundException;
@@ -92,7 +94,8 @@ public class WorkshopService {
         return mapToWorkshopResponseList(workshops);
     }
 
-    public void createWorkshop(WorkshopRequest request) {
+    @Transactional
+    public void createWorkshop(WorkshopCreateRequest request) {
         Workshop workshop = Workshop.builder()
                 .workshopName(request.getWorkshopName())
                 .description(request.getDescription())
@@ -127,7 +130,8 @@ public class WorkshopService {
         workshopRepository.save(workshop);
     }
 
-    public void updateWorkshop(Long workshopId, WorkshopRequest request) {
+    @Transactional
+    public void updateWorkshop(Long workshopId, WorkshopUpdateRequest request) {
         Workshop workshop = workshopRepository.findById(workshopId)
                 .orElseThrow(() -> new NotFoundException("Workshop not found with id: " + workshopId));
         if (request.getWorkshopName() != null) {
@@ -159,29 +163,10 @@ public class WorkshopService {
             }
         }
 
-        // Update activities
-        if (request.getActivities() != null) {
-            // Clear existing activities
-            workshop.getActivities().clear();
-            // Add new activities
-            for (var activityRequest : request.getActivities()) {
-                Activity activities = Activity.builder()
-                        .activityName(activityRequest.getActivityName())
-                        .startDate(activityRequest.getStartDate())
-                        .endDate(activityRequest.getEndDate())
-                        .description(activityRequest.getDescription())
-                        .dateCanRegister(activityRequest.getDateCanRegister())
-                        .price(activityRequest.getPrice())
-                        .registerCapacity(activityRequest.getRegisterCapacity())
-                        .build();
-                
-                workshop.addActivity(activities);
-            }
-        }
-
         workshopRepository.save(workshop);
     }
 
+    @Transactional
     public void deleteWorkshop(Long workshopId) {
         Workshop workshop = workshopRepository.findById(workshopId)
                 .orElseThrow(() -> new NotFoundException("Workshop not found with id: " + workshopId));

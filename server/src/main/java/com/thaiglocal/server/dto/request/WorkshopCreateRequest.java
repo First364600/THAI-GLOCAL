@@ -13,7 +13,7 @@ import lombok.Setter;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class WorkshopRequest {
+public class WorkshopCreateRequest {
     private String workshopName;
     private String description;
     private Double price;
