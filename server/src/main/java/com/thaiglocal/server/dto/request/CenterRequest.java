@@ -25,8 +25,6 @@ public class CenterRequest {
     private String googleMapLink;
     @NotBlank(message = "Address is required")
     private String address;
-    @NotBlank(message = "Telephone is required")
-    private String telephone;
     @Email(message = "Invalid email format")
     private String email;
     private String line;

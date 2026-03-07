@@ -34,6 +34,13 @@ public class CenterController {
         return ResponseEntity.ok(centers);
     }
 
+    // Method: GET /api/centers/{centerId}
+    @GetMapping("/{centerId}")
+    public ResponseEntity<CenterResponse> getCenterById(@PathVariable Long centerId) {
+        CenterResponse response = centerService.getCenterById(centerId);
+        return ResponseEntity.ok(response);
+    }
+
     // Method: GET /api/centers/search?name=...
     @GetMapping("/search")
     public ResponseEntity<List<CenterResponse>> searchCentersByName(@RequestParam("name") String centerName) {

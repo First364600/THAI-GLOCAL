@@ -73,6 +73,12 @@ public class CenterService {
         return mapToCenterResponseList(centers);
     }
 
+    public CenterResponse getCenterById(Long centerId) {
+        Center center = centerRepository.findById(centerId)
+                .orElseThrow(() -> new NotFoundException("Center not found with id: " + centerId));
+        return mapToCenterResponse(center);
+    }
+
     public List<CenterResponse> searchCentersByName(String centerName) {
         List<Center> centers = centerRepository.findByCenterNameContainingIgnoreCase(centerName);
         return mapToCenterResponseList(centers);
