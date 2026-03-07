@@ -1,7 +1,5 @@
-package com.thaiglocal.server.dto.response;
-
+package com.thaiglocal.server.dto.request;
 import java.util.List;
-
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -14,13 +12,12 @@ import lombok.Setter;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class WorkshopResponse {
-    private Long workshopId;
+public class WorkshopUpdateRequest {
     private String workshopName;
     private String description;
     private Double price;
-    private Integer MemberCapacity;
+    private Integer memberCapacity;
     private String workshopType;
+    private Long centerId;
     private List<String> workshopImages;
-    private List<ActivityResponse> activities;
 }

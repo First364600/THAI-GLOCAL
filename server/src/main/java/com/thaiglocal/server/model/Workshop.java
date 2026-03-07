@@ -25,7 +25,7 @@ public class Workshop {
     private String workshopName;
     private String description;
     private Double price;
-    private Integer MemberCapacity;
+    private Integer memberCapacity;
     private String workshopType;
 
     // relationship

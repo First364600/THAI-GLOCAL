@@ -1,7 +1,6 @@
 package com.thaiglocal.server.dto.response;
 
-import java.util.List;
-
+import java.time.LocalDateTime;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -14,13 +13,14 @@ import lombok.Setter;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class WorkshopResponse {
-    private Long workshopId;
-    private String workshopName;
+public class ActivityResponse {
+    private Long activityId;
+
+    private String activityName;
+    private LocalDateTime startDate;
+    private LocalDateTime endDate;
     private String description;
+    private LocalDateTime dateCanRegister;
     private Double price;
-    private Integer MemberCapacity;
-    private String workshopType;
-    private List<String> workshopImages;
-    private List<ActivityResponse> activities;
+    private Integer registerCapacity;
 }

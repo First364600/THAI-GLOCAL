@@ -191,7 +191,7 @@ public class CenterService {
             center.setLeaderTelephone(request.getLeaderTelephone());
         }
 
-        if (request.getCenterImages() != null && !request.getCenterImages().isEmpty()) {
+        if (request.getCenterImages() != null) {
             // remove existing images
             center.getCenterImages().clear();
 
@@ -204,7 +204,7 @@ public class CenterService {
             }
         }
 
-        if (request.getTelephones() != null && !request.getTelephones().isEmpty()) {
+        if (request.getTelephones() != null) {
             // remove existing telephones
             center.getTelephones().clear();
 
