@@ -1,6 +1,7 @@
 package com.thaiglocal.server.dto.request;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 import jakarta.validation.constraints.*;
 import lombok.Builder;
@@ -31,4 +32,6 @@ public class CenterRequest {
     private String leaderFirstName;
     private String leaderLastName;
     private String leaderTelephone;
+    private List<String> centerImages;
+    private List<String> telephones;
 }

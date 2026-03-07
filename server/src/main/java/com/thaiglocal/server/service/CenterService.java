@@ -9,6 +9,8 @@ import com.thaiglocal.server.dto.response.CenterResponse;
 import com.thaiglocal.server.exception.InvalidRoleException;
 import com.thaiglocal.server.exception.NotFoundException;
 import com.thaiglocal.server.model.Center;
+import com.thaiglocal.server.model.CenterImage;
+import com.thaiglocal.server.model.Telephone;
 import com.thaiglocal.server.model.User;
 import com.thaiglocal.server.model.enums.RoleName;
 import com.thaiglocal.server.repository.CenterRepository;
@@ -31,9 +33,17 @@ public class CenterService {
     }
 
     private CenterResponse mapToCenterResponse(Center center) {
+        List<String> imageUrls = center.getCenterImages().stream()
+            .map(CenterImage::getImageUrl)
+            .toList();
+        List<String> telephoneNumbers = center.getTelephones().stream()
+            .map(Telephone::getTelephoneNumber)
+            .toList();
+
         return CenterResponse.builder()
                 .centerId(center.getCenterId())
                 .centerName(center.getCenterName())
+                .description(center.getDescription())
                 .address(center.getAddress())
                 .subDistrict(center.getSubDistrict())
                 .district(center.getDistrict())
@@ -47,6 +57,8 @@ public class CenterService {
                 .leaderFirstName(center.getLeaderFirstName())
                 .leaderLastName(center.getLeaderLastName())
                 .leaderTelephone(center.getLeaderTelephone())
+                .centerImages(imageUrls)
+                .telephones(telephoneNumbers)
                 .build();
     }
 
@@ -102,6 +114,24 @@ public class CenterService {
                 .leaderTelephone(request.getLeaderTelephone())
                 .build();
 
+        if (request.getCenterImages() != null && !request.getCenterImages().isEmpty()) {
+            for (String imageUrl : request.getCenterImages()) {
+                CenterImage image = new CenterImage();
+                image.setImageUrl(imageUrl);
+                
+                center.addCenterImage(image);
+            }
+        }
+
+        if (request.getTelephones() != null && !request.getTelephones().isEmpty()) {
+            for (String telephoneNumber : request.getTelephones()) {
+                Telephone telephone = new Telephone();
+                telephone.setTelephoneNumber(telephoneNumber);
+                
+                center.addTelephone(telephone);
+            }
+        }
+
         centerRepository.save(center);
     }
 
@@ -153,6 +183,31 @@ public class CenterService {
         }
         if (request.getLeaderTelephone() != null) {
             center.setLeaderTelephone(request.getLeaderTelephone());
+        }
+
+        if (request.getCenterImages() != null && !request.getCenterImages().isEmpty()) {
+            // remove existing images
+            center.getCenterImages().clear();
+
+            // add new images
+            for (String imageUrl : request.getCenterImages()) {
+                CenterImage image = new CenterImage();
+                image.setImageUrl(imageUrl);
+                
+                center.addCenterImage(image);
+            }
+        }
+
+        if (request.getTelephones() != null && !request.getTelephones().isEmpty()) {
+            // remove existing telephones
+            center.getTelephones().clear();
+
+            // add new telephones
+            for (String telephoneNumber : request.getTelephones()) {
+                Telephone telephone = new Telephone();
+                telephone.setTelephoneNumber(telephoneNumber);
+                center.addTelephone(telephone);
+            }
         }
 
         centerRepository.save(center);

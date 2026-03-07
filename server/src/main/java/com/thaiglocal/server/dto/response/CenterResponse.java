@@ -1,6 +1,7 @@
 package com.thaiglocal.server.dto.response;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 import lombok.Builder;
 import lombok.Getter;
@@ -27,4 +28,7 @@ public class CenterResponse {
     private String leaderFirstName;
     private String leaderLastName;
     private String leaderTelephone;
+
+    private List<String> centerImages;
+    private List<String> telephones;
 }
