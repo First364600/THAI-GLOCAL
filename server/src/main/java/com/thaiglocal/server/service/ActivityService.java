@@ -55,8 +55,8 @@ public class ActivityService {
         return mapToActivityResponse(activity);
     }
 
-    public List<ActivityResponse> getAllActivities(Long workshopId) {
-        List<Activity> activities = activityRepository.findByWorkshop_WorkshopId(workshopId);
+    public List<ActivityResponse> getAllActivities() {
+        List<Activity> activities = activityRepository.findAll();
         return mapToActivityResponseList(activities);
     }
 
