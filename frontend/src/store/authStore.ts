@@ -46,7 +46,11 @@ const useAuthStore = create<AuthState>()(
           localStorage.setItem("tg_users", JSON.stringify(users));
         }
 
-        const found = users.find((u) => u.email.toLowerCase() === email.toLowerCase());
+        const found = users.find(
+          (u) =>
+            u.email.toLowerCase() === emailOrUsername.toLowerCase() ||
+            (u.username && u.username.toLowerCase() === emailOrUsername.toLowerCase())
+        );
         if (!found || found.password !== password) throw new Error("Invalid email or password.");
         if (found.status === "suspended") throw new Error("This account is suspended.");
 
