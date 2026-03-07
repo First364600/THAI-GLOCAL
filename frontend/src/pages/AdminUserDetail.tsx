@@ -45,6 +45,10 @@ export function AdminUserDetail({
     return <div className="p-8 text-center text-stone-500">User not found.</div>;
   }
 
+  const getDisplayName = (u: any) =>
+    [u.firstName, u.lastName].filter(Boolean).join(' ') || u.username || u.email || '';
+  const displayName = getDisplayName(user);
+
   const roleColor =
     user.role === "super_admin" ? "bg-purple-100 text-purple-800"
     : user.role === "admin"      ? "bg-blue-100 text-blue-800"
@@ -74,10 +78,10 @@ export function AdminUserDetail({
         </button>
         <div className="flex items-center gap-3 flex-wrap">
           <div className="w-12 h-12 rounded-full bg-amber-500 flex items-center justify-center text-white font-bold text-lg select-none">
-            {user.name.charAt(0).toUpperCase()}
+            {displayName.charAt(0).toUpperCase()}
           </div>
           <div>
-            <h2 className="text-2xl font-bold text-stone-900">{user.name}</h2>
+            <h2 className="text-2xl font-bold text-stone-900">{displayName}</h2>
             <p className="text-stone-500 text-sm">{user.email}</p>
           </div>
           <span className={`px-2.5 py-1 rounded-md text-xs font-semibold uppercase tracking-wider ${roleColor}`}>
@@ -107,8 +111,8 @@ export function AdminUserDetail({
       </div>
 
       {activeTab === "info"     && <UserInfoTab userId={userId} />}
-      {activeTab === "bookings" && <UserBookingsTab userId={userId} userName={user.name} />}
-      {activeTab === "status"   && <UserStatusTab userId={userId} userName={user.name} />}
+      {activeTab === "bookings" && <UserBookingsTab userId={userId} userName={displayName} />}
+      {activeTab === "status"   && <UserStatusTab userId={userId} userName={displayName} />}
     </div>
   );
 }
@@ -121,13 +125,14 @@ function UserInfoTab({ userId }: { userId: string }) {
   const user = useAdminStore((s) => s.users.find((u) => u.id === userId));
   const updateUserInfo = useAdminStore((s) => s.updateUserInfo);
 
-  const [name, setName] = useState(user?.name ?? "");
+  const [firstName, setFirstName] = useState(user?.firstName ?? "");
+  const [lastName, setLastName] = useState(user?.lastName ?? "");
   const [email, setEmail] = useState(user?.email ?? "");
   const [phone, setPhone] = useState((user as { phone?: string })?.phone ?? "");
   const [saved, setSaved] = useState(false);
 
   const handleSave = () => {
-    updateUserInfo(userId, { name, phone, email });
+    updateUserInfo(userId, { firstName, lastName, phone, email });
     setSaved(true);
     setTimeout(() => setSaved(false), 2500);
   };
@@ -136,7 +141,7 @@ function UserInfoTab({ userId }: { userId: string }) {
     <SectionCard title={di.section}>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <Field label={di.username}>
-          <input className={inputCls()} value={name} onChange={(e) => setName(e.target.value)} />
+          <input className={inputCls()} value={`${firstName} ${lastName}`.trim()} disabled placeholder="Name" />
         </Field>
         <Field label={di.email}>
           <input className={inputCls()} value={email} onChange={(e) => setEmail(e.target.value)} />

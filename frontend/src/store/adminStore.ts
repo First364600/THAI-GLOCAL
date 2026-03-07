@@ -34,7 +34,7 @@ export interface AdminState {
 
   updateUserRole: (userId: string, role: "user" | "center" | "admin" | "super_admin") => void;
   updateUserStatus: (userId: string, status: "active" | "suspended") => void;
-  updateUserInfo: (userId: string, data: { name?: string; phone?: string; email?: string }) => void;
+  updateUserInfo: (userId: string, data: { firstName?: string; lastName?: string; phone?: string; email?: string }) => void;
 
   updateAdminCenter: (centerId: string, data: Partial<Omit<Center, "id">>) => void;
   updateCenterStatus: (centerId: string, status: CenterStatus) => void;

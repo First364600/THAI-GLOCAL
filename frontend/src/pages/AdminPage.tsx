@@ -7,6 +7,9 @@ import { AdminCenterDetail } from "./AdminCenterDetail";
 import { AdminUserDetail } from "./AdminUserDetail";
 import { CheckCircle2, XCircle, Search, Trash2, Shield, AlertTriangle } from "lucide-react";
 
+export const getDisplayName = (u: any) =>
+  [u.firstName, u.lastName].filter(Boolean).join(' ') || u.username || u.email || '';
+
 // ─── Toggle Switch ───────────────────────────────────────────────────────────
 function ToggleSwitch({
   checked,
@@ -369,7 +372,7 @@ function UserManagementTab() {
   }
 
   const filtered = users.filter((u) =>
-    u.name.toLowerCase().includes(searchQuery.toLowerCase())
+    getDisplayName(u).toLowerCase().includes(searchQuery.toLowerCase())
   );
 
   const roleLabel = (role?: string) => {
@@ -436,7 +439,7 @@ function UserManagementTab() {
                   <td className="p-4 text-stone-400 text-xs font-mono max-w-[120px] truncate" title={u.id}>
                     {u.id}
                   </td>
-                  <td className="p-4 font-medium text-stone-900">{u.name}</td>
+                  <td className="p-4 font-medium text-stone-900">{getDisplayName(u)}</td>
                   <td className="p-4 text-stone-600 text-sm">{u.email}</td>
                   <td className="p-4">
                     <span className={`px-2.5 py-1 rounded-md text-xs font-semibold uppercase tracking-wider ${roleColor(u.role)}`}>
@@ -452,7 +455,7 @@ function UserManagementTab() {
                     <div className="flex items-center justify-center gap-3">
                       <ToggleSwitch
                         checked={isActive}
-                        onChange={() => handleToggle(u.id, u.status, u.name)}
+                        onChange={() => handleToggle(u.id, u.status, getDisplayName(u))}
                         label={isActive ? t.userMgmt.toggle.disable : t.userMgmt.toggle.enable}
                       />
                       <span className="text-xs text-stone-500 w-14">
@@ -490,9 +493,6 @@ function PrivilegesTab() {
   const updateUserStatus = useAdminStore((s) => s.updateUserStatus);
   const { t } = useTranslation();
   const [searchQuery, setSearchQuery] = useState("");
-
-  const getDisplayName = (u: (typeof users)[0]) =>
-    [u.firstName, u.lastName].filter(Boolean).join(' ') || u.username || u.email || '';
 
   const filteredUsers = users.filter(u => {
     const displayName = getDisplayName(u).toLowerCase();
