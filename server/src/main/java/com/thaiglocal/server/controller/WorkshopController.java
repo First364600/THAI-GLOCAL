@@ -85,7 +85,7 @@ public class WorkshopController {
     @PatchMapping("/update/{workshopId}")
     public ResponseEntity<Void> updateWorkshop(
             @PathVariable Long workshopId,
-            @Valid @RequestBody WorkshopUpdateRequest request) {
+            @RequestBody WorkshopUpdateRequest request) {
         workshopService.updateWorkshop(workshopId, request);
         return ResponseEntity.ok().build(); // HTTP 200
     }

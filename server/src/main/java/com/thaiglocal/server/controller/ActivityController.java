@@ -62,7 +62,7 @@ public class ActivityController {
     @PatchMapping("/update/{activityId}")
     public ResponseEntity<Void> updateActivity(
             @PathVariable Long activityId,
-            @Valid @RequestBody ActivityRequest request) {
+            @RequestBody ActivityRequest request) {
         activityService.updateActivity(activityId, request);
         return ResponseEntity.ok().build();
     }
