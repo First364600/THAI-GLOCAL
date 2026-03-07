@@ -30,12 +30,16 @@ export function Navbar() {
   }, []);
 
   const initials = user
-    ? user.name
+    ? ([user.firstName, user.lastName].filter(Boolean).join(" ") || user.username || user.email)
         .split(" ")
         .map((w) => w[0])
         .slice(0, 2)
         .join("")
         .toUpperCase()
+    : "";
+
+  const displayName = user
+    ? [user.firstName, user.lastName].filter(Boolean).join(" ") || user.username || user.email
     : "";
 
   const handleLogout = () => {
@@ -141,14 +145,14 @@ export function Navbar() {
                     {initials}
                   </div>
                   <span className="text-stone-700 font-medium" style={{ fontSize: "0.875rem" }}>
-                    {user.name.split(" ")[0]}
+                    {displayName.split(" ")[0]}
                   </span>
                 </button>
 
                 {profileOpen && (
                   <div className="absolute right-0 top-full mt-2 w-48 bg-white rounded-xl shadow-lg border border-stone-100 py-1 z-50">
                     <div className="px-4 py-2 border-b border-stone-50">
-                      <p className="text-xs font-medium text-stone-800 truncate">{user.name}</p>
+                      <p className="text-xs font-medium text-stone-800 truncate">{displayName}</p>
                       <p className="text-xs text-stone-400 truncate">{user.email}</p>
                     </div>
                     <Link
@@ -246,7 +250,7 @@ export function Navbar() {
                     {initials}
                   </div>
                   <div>
-                    <p className="text-sm font-medium text-stone-800">{user.name}</p>
+                    <p className="text-sm font-medium text-stone-800">{displayName}</p>
                     <p className="text-xs text-stone-400">{user.email}</p>
                   </div>
                 </div>

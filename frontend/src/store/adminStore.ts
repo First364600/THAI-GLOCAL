@@ -67,9 +67,9 @@ const useAdminStore = create<AdminState>()(
         }
       ],
       users: [
-        { id: "u-super", name: "Super Admin", email: "super@admin.com", role: "super_admin", status: "active" },
-        { id: "u-admin", name: "Gen Admin", email: "admin@tg.com", role: "admin", status: "active" },
-        { id: "u-1", name: "Somchai User", email: "somchai@test.com", role: "user", status: "active" },
+        { id: "u-super", firstName: "Super", lastName: "Admin", email: "super@admin.com", role: "super_admin", status: "active" },
+        { id: "u-admin", firstName: "Gen", lastName: "Admin", email: "admin@tg.com", role: "admin", status: "active" },
+        { id: "u-1", firstName: "Somchai", lastName: "User", email: "somchai@test.com", role: "user", status: "active" },
       ],
 
       addRegistrationRequest: (req) => {

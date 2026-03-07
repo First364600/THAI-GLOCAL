@@ -1,15 +1,16 @@
-import { useState } from "react";
+﻿import { useState } from "react";
 import { useNavigate } from "react-router";
-import { User, Phone, FileText, Save, LogOut, Camera } from "lucide-react";
+import { User, Phone, MapPin, Save, LogOut, AtSign, IdCard } from "lucide-react";
 import useAuthStore from "../store/authStore";
 
 function Avatar({ name, size = 80 }: { name: string; size?: number }) {
   const initials = name
     .split(" ")
+    .filter(Boolean)
     .map((w) => w[0])
     .slice(0, 2)
     .join("")
-    .toUpperCase();
+    .toUpperCase() || "?";
   return (
     <div
       className="rounded-full bg-amber-500 flex items-center justify-center text-white font-bold select-none"
@@ -20,23 +21,43 @@ function Avatar({ name, size = 80 }: { name: string; size?: number }) {
   );
 }
 
+const inputCls = "w-full pl-9 pr-4 py-2.5 rounded-xl border border-stone-200 focus:border-amber-400 focus:ring-2 focus:ring-amber-100 outline-none transition text-stone-800 text-sm";
+const labelCls = "block text-sm font-medium text-stone-700 mb-1.5";
+
 export function ProfilePage() {
   const navigate = useNavigate();
   const { user, updateProfile, logout } = useAuthStore();
 
-  const [name, setName] = useState(user?.name ?? "");
-  const [phone, setPhone] = useState(user?.phone ?? "");
-  const [bio, setBio] = useState(user?.bio ?? "");
+  const [username, setUsername] = useState(user?.username ?? "");
+  const [firstName, setFirstName] = useState(user?.firstName ?? "");
+  const [lastName, setLastName] = useState(user?.lastName ?? "");
+  const [telephone, setTelephone] = useState(user?.telephone ?? "");
+  const [address, setAddress] = useState(user?.address ?? "");
   const [saved, setSaved] = useState(false);
+  const [usernameError, setUsernameError] = useState("");
+
+  const USERNAME_REGEX = /^[a-zA-Z0-9_.]+$/;
 
   if (!user) {
     navigate("/login", { replace: true });
     return null;
   }
 
+  const displayName = [user.firstName, user.lastName].filter(Boolean).join(" ") || user.username || user.email;
+
   const handleSave = (e: React.FormEvent) => {
     e.preventDefault();
-    updateProfile({ name: name.trim(), phone: phone.trim(), bio: bio.trim() });
+    if (username.trim() && !USERNAME_REGEX.test(username.trim())) {
+      setUsernameError("Username can only contain letters, numbers, _ and .");
+      return;
+    }
+    updateProfile({
+      username: username.trim(),
+      firstName: firstName.trim(),
+      lastName: lastName.trim(),
+      telephone: telephone.trim(),
+      address: address.trim(),
+    });
     setSaved(true);
     setTimeout(() => setSaved(false), 2000);
   };
@@ -54,16 +75,11 @@ export function ProfilePage() {
           className="rounded-2xl p-8 mb-6 flex flex-col sm:flex-row items-center sm:items-start gap-6"
           style={{ background: "linear-gradient(135deg, #78350f 0%, #b45309 100%)" }}
         >
-          <div className="relative">
-            <Avatar name={user.name} size={88} />
-            <div className="absolute bottom-0 right-0 w-7 h-7 rounded-full bg-white flex items-center justify-center shadow">
-              <Camera className="w-3.5 h-3.5 text-stone-500" />
-            </div>
-          </div>
+          <Avatar name={displayName} size={88} />
           <div className="text-center sm:text-left">
-            <h1 className="text-2xl font-bold text-white">{user.name}</h1>
+            <h1 className="text-2xl font-bold text-white">{displayName}</h1>
+            {user.username && <p className="text-amber-300 text-sm mt-0.5">@{user.username}</p>}
             <p className="text-amber-200 text-sm mt-0.5">{user.email}</p>
-            {user.bio && <p className="text-amber-100/80 text-sm mt-2 max-w-sm">{user.bio}</p>}
           </div>
         </div>
 
@@ -72,27 +88,64 @@ export function ProfilePage() {
           <h2 className="text-lg font-semibold text-stone-800 mb-6">Edit Profile</h2>
 
           <form onSubmit={handleSave} className="flex flex-col gap-5">
-            {/* Name */}
+
+            {/* Username */}
             <div>
-              <label htmlFor="p-name" className="block text-sm font-medium text-stone-700 mb-1.5">
-                Full name
-              </label>
+              <label htmlFor="p-username" className={labelCls}>Username</label>
               <div className="relative">
-                <User className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-stone-400" />
+                <AtSign className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-stone-400" />
                 <input
-                  id="p-name"
+                  id="p-username"
                   type="text"
-                  value={name}
-                  onChange={(e) => setName(e.target.value)}
-                  required
-                  className="w-full pl-9 pr-4 py-2.5 rounded-xl border border-stone-200 focus:border-amber-400 focus:ring-2 focus:ring-amber-100 outline-none transition text-stone-800 text-sm"
+                  value={username}
+                  onChange={(e) => {
+                    setUsername(e.target.value);
+                    if (e.target.value && !USERNAME_REGEX.test(e.target.value))
+                      setUsernameError("Username can only contain letters, numbers, _ and .");
+                    else
+                      setUsernameError("");
+                  }}
+                  placeholder="e.g. somchai99"
+                  className={inputCls + (usernameError ? " border-red-400 focus:border-red-400 focus:ring-red-100" : "")}
                 />
+              </div>
+            </div>
+
+            {/* First / Last name */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div>
+                <label htmlFor="p-firstname" className={labelCls}>First name</label>
+                <div className="relative">
+                  <User className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-stone-400" />
+                  <input
+                    id="p-firstname"
+                    type="text"
+                    value={firstName}
+                    onChange={(e) => setFirstName(e.target.value)}
+                    placeholder="Somchai"
+                    className={inputCls}
+                  />
+                </div>
+              </div>
+              <div>
+                <label htmlFor="p-lastname" className={labelCls}>Last name</label>
+                <div className="relative">
+                  <IdCard className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-stone-400" />
+                  <input
+                    id="p-lastname"
+                    type="text"
+                    value={lastName}
+                    onChange={(e) => setLastName(e.target.value)}
+                    placeholder="Jaidee"
+                    className={inputCls}
+                  />
+                </div>
               </div>
             </div>
 
             {/* Email (read-only) */}
             <div>
-              <label className="block text-sm font-medium text-stone-700 mb-1.5">
+              <label className={labelCls}>
                 Email address <span className="text-stone-400 font-normal">(cannot change)</span>
               </label>
               <input
@@ -103,37 +156,33 @@ export function ProfilePage() {
               />
             </div>
 
-            {/* Phone */}
+            {/* Telephone */}
             <div>
-              <label htmlFor="p-phone" className="block text-sm font-medium text-stone-700 mb-1.5">
-                Phone number
-              </label>
+              <label htmlFor="p-tel" className={labelCls}>Telephone</label>
               <div className="relative">
                 <Phone className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-stone-400" />
                 <input
-                  id="p-phone"
+                  id="p-tel"
                   type="tel"
-                  value={phone}
-                  onChange={(e) => setPhone(e.target.value)}
+                  value={telephone}
+                  onChange={(e) => setTelephone(e.target.value)}
                   placeholder="e.g. 081-234-5678"
-                  className="w-full pl-9 pr-4 py-2.5 rounded-xl border border-stone-200 focus:border-amber-400 focus:ring-2 focus:ring-amber-100 outline-none transition text-stone-800 text-sm"
+                  className={inputCls}
                 />
               </div>
             </div>
 
-            {/* Bio */}
+            {/* Address */}
             <div>
-              <label htmlFor="p-bio" className="block text-sm font-medium text-stone-700 mb-1.5">
-                Short bio
-              </label>
+              <label htmlFor="p-address" className={labelCls}>Address</label>
               <div className="relative">
-                <FileText className="absolute left-3 top-3 w-4 h-4 text-stone-400" />
+                <MapPin className="absolute left-3 top-3 w-4 h-4 text-stone-400" />
                 <textarea
-                  id="p-bio"
-                  value={bio}
-                  onChange={(e) => setBio(e.target.value)}
+                  id="p-address"
+                  value={address}
+                  onChange={(e) => setAddress(e.target.value)}
                   rows={3}
-                  placeholder="Tell us a little about yourself…"
+                  placeholder="123 Moo 4, Tambon Mae Rim, Chiang Mai 50180"
                   className="w-full pl-9 pr-4 py-2.5 rounded-xl border border-stone-200 focus:border-amber-400 focus:ring-2 focus:ring-amber-100 outline-none transition text-stone-800 text-sm resize-none"
                 />
               </div>
@@ -142,9 +191,7 @@ export function ProfilePage() {
             <button
               type="submit"
               className={`flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl font-medium text-sm transition-colors shadow-sm ${
-                saved
-                  ? "bg-green-500 text-white"
-                  : "bg-amber-500 hover:bg-amber-600 text-white"
+                saved ? "bg-green-500 text-white" : "bg-amber-500 hover:bg-amber-600 text-white"
               }`}
             >
               <Save className="w-4 h-4" />
@@ -153,7 +200,7 @@ export function ProfilePage() {
           </form>
         </div>
 
-        {/* Danger zone */}
+        {/* Sign out */}
         <div className="mt-4 flex justify-end">
           <button
             onClick={handleLogout}
@@ -167,3 +214,4 @@ export function ProfilePage() {
     </div>
   );
 }
+

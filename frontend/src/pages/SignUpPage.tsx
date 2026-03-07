@@ -1,4 +1,4 @@
-import { useState } from "react";
+﻿import { useState } from "react";
 import { Link, useNavigate } from "react-router";
 import { Eye, EyeOff, BookOpen, UserPlus } from "lucide-react";
 import useAuthStore from "../store/authStore";
@@ -7,7 +7,6 @@ export function SignUpPage() {
   const navigate = useNavigate();
   const signup = useAuthStore((s) => s.signup);
 
-  const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirm, setConfirm] = useState("");
@@ -24,8 +23,8 @@ export function SignUpPage() {
     }
     setLoading(true);
     try {
-      await signup(name.trim(), email.trim(), password);
-      navigate("/profile", { replace: true });
+      await signup(email.trim(), password);
+      navigate("/create-profile", { replace: true });
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : "Sign up failed.");
     } finally {
@@ -54,23 +53,6 @@ export function SignUpPage() {
           )}
 
           <form onSubmit={handleSubmit} className="flex flex-col gap-4">
-            {/* Name */}
-            <div>
-              <label htmlFor="name" className="block text-sm font-medium text-stone-700 mb-1.5">
-                Full name
-              </label>
-              <input
-                id="name"
-                type="text"
-                autoComplete="name"
-                required
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-                placeholder="Somchai Jaidee"
-                className="w-full px-4 py-2.5 rounded-xl border border-stone-200 focus:border-amber-400 focus:ring-2 focus:ring-amber-100 outline-none transition text-stone-800 text-sm"
-              />
-            </div>
-
             {/* Email */}
             <div>
               <label htmlFor="email" className="block text-sm font-medium text-stone-700 mb-1.5">
@@ -144,7 +126,7 @@ export function SignUpPage() {
               ) : (
                 <UserPlus className="w-4 h-4" />
               )}
-              {loading ? "Creating account…" : "Create Account"}
+              {loading ? "Creating accountโ€ฆ" : "Create Account"}
             </button>
           </form>
 
@@ -159,3 +141,4 @@ export function SignUpPage() {
     </div>
   );
 }
+

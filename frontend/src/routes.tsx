@@ -10,6 +10,7 @@ import { SignUpPage } from "./pages/SignUpPage";
 import { ProfilePage } from "./pages/ProfilePage";
 import { MyCenterPage } from "./pages/MyCenterPage";
 import { WorkshopSessionsPage } from "./pages/WorkshopSessionsPage";
+import { CreateProfilePage } from "./pages/CreateProfilePage";
 import { AdminPage } from "./pages/AdminPage";
 
 export const router = createBrowserRouter([
@@ -33,4 +34,6 @@ export const router = createBrowserRouter([
       { path: "*", element: <Navigate to="/" replace /> },
     ],
   },
+  // Standalone page — no Navbar so users must complete their profile
+  { path: "/create-profile", Component: CreateProfilePage },
 ]);

@@ -491,11 +491,14 @@ function PrivilegesTab() {
   const { t } = useTranslation();
   const [searchQuery, setSearchQuery] = useState("");
 
-  const filteredUsers = users.filter(
-    (u) =>
-      u.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      u.email.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+  const getDisplayName = (u: (typeof users)[0]) =>
+    [u.firstName, u.lastName].filter(Boolean).join(' ') || u.username || u.email || '';
+
+  const filteredUsers = users.filter(u => {
+    const displayName = getDisplayName(u).toLowerCase();
+    const q = searchQuery.toLowerCase();
+    return displayName.includes(q) || (u.email?.toLowerCase() ?? '').includes(q);
+  });
 
   return (
     <div className="bg-white rounded-2xl border border-stone-200 shadow-sm overflow-hidden">
@@ -530,7 +533,7 @@ function PrivilegesTab() {
                 className="border-b border-stone-100 hover:bg-stone-50 transition-colors"
               >
                 <td className="p-4">
-                  <div className="font-medium text-stone-900">{u.name}</div>
+                  <div className="font-medium text-stone-900">{getDisplayName(u)}</div>
                   <div className="text-sm text-stone-500">{u.email}</div>
                 </td>
                 <td className="p-4">
