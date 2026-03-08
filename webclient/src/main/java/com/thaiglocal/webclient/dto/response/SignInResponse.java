@@ -1,4 +1,6 @@
-package com.thaiglocal.server.dto.response;
+package com.thaiglocal.webclient.dto.response;
+
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -10,14 +12,13 @@ import lombok.Setter;
 @NoArgsConstructor
 @AllArgsConstructor
 public class SignInResponse {
-    // private Long userId;
-    // private String username;
-    // private String email;
-    // private String role;
-    // Barear
-    // private String tokenType;
+    @JsonProperty("userResponse")
     private UserResponse userResponse;
+
+    @JsonProperty("accessToken")
     private String accessToken;
+
+    @JsonProperty("refreshToken")
     private String refreshToken;
 }
 

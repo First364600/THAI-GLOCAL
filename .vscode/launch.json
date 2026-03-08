@@ -2,6 +2,13 @@
     "configurations": [
         {
             "type": "java",
+            "name": "WebclientApplication",
+            "request": "launch",
+            "mainClass": "com.thaiglocal.webclient.WebclientApplication",
+            "projectName": "webclient"
+        },
+        {
+            "type": "java",
             "name": "Spring Boot-ServerApplication<server>",
             "request": "launch",
             "cwd": "${workspaceFolder}",

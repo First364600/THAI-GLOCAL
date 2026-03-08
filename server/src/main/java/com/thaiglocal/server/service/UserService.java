@@ -1,16 +1,8 @@
 package com.thaiglocal.server.service;
 
-import java.sql.Date;
-import java.sql.Time;
-import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
-
-import org.hibernate.jdbc.Expectation.RowCount;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.util.Pair;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -22,20 +14,29 @@ import com.thaiglocal.server.dto.response.UserResponse;
 import com.thaiglocal.server.model.User;
 import com.thaiglocal.server.model.enums.RoleName;
 import com.thaiglocal.server.repository.UserRepository;
-import com.thaiglocal.server.security.CustomUserDetails;
 import com.thaiglocal.server.security.JwtUtils;
+import org.springframework.mail.SimpleMailMessage;
+import org.springframework.mail.javamail.JavaMailSender;
+import java.security.SecureRandom;
 
 @Service
 public class UserService {
+    
     @Autowired
     private UserRepository userRepository;
-
+    
     @Autowired
     private JwtUtils jwtUtils;
 
     @Autowired
     private PasswordEncoder passwordEncoder;
-
+    
+    @Autowired
+    private JavaMailSender mailSender;
+    
+    private static final String CHARACTERS = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*";
+    private static final int PASSWORD_LENGTH = 12;
+    
     // login
     public SignInResponse signIn(SignInRequest request) {
         String loginId = request.getUsernameOrEmail();
@@ -58,7 +59,7 @@ public class UserService {
         );
     }
 
-    public String signUp(SignUpRequest request) {
+    public UserResponse signUp(SignUpRequest request) {
         if (userRepository.existsByUsername(request.getUsername())) {
             throw new RuntimeException("Username is already taken.");
         }
@@ -79,8 +80,8 @@ public class UserService {
         user.setBirthDate(request.getBirthDate());
         user.setCreatedAt(LocalDateTime.now());
 
-        userRepository.save(user);
-        return "User registered successfully";
+        User saved = userRepository.save(user);
+        return mapToUserResponse(saved);
     }
 
     public UserResponse updateUser(Long userId, UserRequest request) {
@@ -170,4 +171,59 @@ public class UserService {
     // get user data (get) /
     
     // jwt use userId, role, expired, create at, create from
+    
+    /**
+     * Generate random password, update user password, and send via email
+     */
+    public void forgetPassword(String email) {
+        User user = userRepository.findByEmail(email)
+            .orElseThrow(() -> new RuntimeException("User not found with email: " + email));
+        
+        // สุ่มรหัสใหม่
+        String newPassword = generateRandomPassword();
+        
+        // อัพเดตรหัสในฐานข้อมูล (เลยใช้ได้เลย ไม่ต้องรอ verify)
+        user.setPassword(passwordEncoder.encode(newPassword));
+        userRepository.save(user);
+        
+        // ส่ง email พร้อมรหัสใหม่
+        sendPasswordEmail(user.getEmail(), user.getUsername(), newPassword);
+    }
+    
+    /**
+     * Generate random password (12 ตัวอักษร + numbers + special characters)
+     */
+    private String generateRandomPassword() {
+        SecureRandom random = new SecureRandom();
+        StringBuilder password = new StringBuilder();
+        
+        for (int i = 0; i < PASSWORD_LENGTH; i++) {
+            password.append(CHARACTERS.charAt(random.nextInt(CHARACTERS.length())));
+        }
+        
+        return password.toString();
+    }
+    
+    /**
+     * Send password email to user
+     */
+    private void sendPasswordEmail(String email, String username, String newPassword) {
+        try {
+            SimpleMailMessage message = new SimpleMailMessage();
+            message.setTo(email);
+            message.setSubject("Your New Password - THAI-GLOCAL");
+            message.setText("Dear " + username + ",\n\n" +
+                "Your password has been successfully reset.\n\n" +
+                "Your new password is: " + newPassword + "\n\n" +
+                "You can now log in using this password.\n" +
+                "Please change it immediately for security purposes.\n\n" +
+                "Best regards,\n" +
+                "THAI-GLOCAL Team");
+            
+            mailSender.send(message);
+        } catch (Exception e) {
+            // Log error but don't throw exception
+            System.err.println("Failed to send email: " + e.getMessage());
+        }
+    }
 }

@@ -2,37 +2,28 @@ package com.thaiglocal.server.controller;
 
 import java.io.IOException;
 import java.time.Duration;
-import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
-
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.util.Pair;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.thaiglocal.server.dto.request.ForgetPasswordRequest;
 import com.thaiglocal.server.dto.request.RoleRequest;
 import com.thaiglocal.server.dto.request.SignInRequest;
 import com.thaiglocal.server.dto.request.SignUpRequest;
 import com.thaiglocal.server.dto.request.UserRequest;
 import com.thaiglocal.server.dto.response.SignInResponse;
 import com.thaiglocal.server.dto.response.UserResponse;
-import com.thaiglocal.server.model.User;
 import com.thaiglocal.server.model.enums.RoleName;
 import com.thaiglocal.server.security.CustomUserDetails;
 import com.thaiglocal.server.service.UserService;
 
-import jakarta.annotation.Nullable;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
-import lombok.AllArgsConstructor;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -90,7 +81,7 @@ public class UserController {
 
         eResponse.addHeader("Set-Cookie", accessCookie.toString());
         eResponse.addHeader("Set-Cookie", refreshCookie.toString());
-        return ResponseEntity.ok(response.getUserResponse());
+        return ResponseEntity.ok(response);
     }
     
     /**
@@ -115,11 +106,12 @@ public class UserController {
      * @throws IOException
      */
     @PostMapping("/signup")
-    public ResponseEntity<String> signUp(
+    public ResponseEntity<UserResponse> signUp(
         @Valid @RequestBody SignUpRequest request,
         HttpServletResponse eResponse
     ) throws IOException {
-        return ResponseEntity.ok(userService.signUp(request)) ;
+        UserResponse userResponse = userService.signUp(request);
+        return ResponseEntity.status(HttpStatus.CREATED).body(userResponse);
     }
 
     /**
@@ -158,23 +150,47 @@ public class UserController {
     }
 
     /**
-     * Request password reset.
+     * Request password reset code.
      * POST /api/forget-password
      * 
      * Request body:
      * {
-     *   "email": "string"
+     *   "email": "user@example.com"
      * }
      * 
-     * @param request UserRequest
+     * @param request ForgetPasswordRequest
      * @return ResponseEntity with status message
      */
     @PostMapping("/forget-password")
     public ResponseEntity<String> forgetPassword (
-        @Valid @RequestBody UserRequest request
+        @Valid @RequestBody ForgetPasswordRequest request
     ) {
-        return ResponseEntity.ok("");
+        userService.forgetPassword(request.getEmail());
+        return ResponseEntity.ok("New password has been sent to your email");
     }
+
+
+    /**
+     * Reset password with verification code.
+     * POST /api/reset-password
+     * 
+     * Request body:
+     * {
+     *   "email": "user@example.com",
+     *   "code": "123456",
+     *   "newPassword": "NewPassword@123"
+     * }
+     * 
+     * @param request VerifyAndResetPasswordRequest
+     * @return ResponseEntity with status message
+     */
+    // @PostMapping("/reset-password")
+    // public ResponseEntity<String> resetPassword(
+    //     @Valid @RequestBody ResetPasswordRequest request
+    // ) {
+    //     userService.resetPassword(request.getToken(), request.getNewPassword());
+    //     return ResponseEntity.ok("Password reset successful");
+    // }
 
     /**
      * Get current user's profile.
@@ -207,10 +223,9 @@ public class UserController {
      * @throws IOException
      */
     @PatchMapping("/users/me")
-    public ResponseEntity<?> updateUserByUserId(
+    public ResponseEntity<?> updateUser(
         @AuthenticationPrincipal CustomUserDetails currentUser,
-        @Valid @RequestBody UserRequest request,
-        BindingResult bindingResult
+        @Valid @RequestBody UserRequest request
     ) throws IOException {
         UserResponse userResponse = userService.updateUser(currentUser.getId(), request);
         return ResponseEntity.ok(userResponse);

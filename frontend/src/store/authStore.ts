@@ -29,7 +29,7 @@ const useAuthStore = create<AuthState>()(
       user: null,
 
       login: async (email, password) => {
-        const res = await fetch('http://localhost:8080/api/signin', {
+        const res = await fetch('http://localhost:8081/api/signin', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ email, password }),

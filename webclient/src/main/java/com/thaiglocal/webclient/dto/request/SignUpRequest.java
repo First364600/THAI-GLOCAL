@@ -1,4 +1,4 @@
-package com.thaiglocal.server.dto.request;
+package com.thaiglocal.webclient.dto.request;
 
 import java.time.LocalDateTime;
 

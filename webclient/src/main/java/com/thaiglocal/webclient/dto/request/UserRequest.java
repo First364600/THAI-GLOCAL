@@ -1,21 +1,24 @@
-package com.thaiglocal.server.dto.response;
+package com.thaiglocal.webclient.dto.request;
 
 import java.time.LocalDateTime;
-import com.thaiglocal.server.model.enums.RoleName;;
+import java.util.Date;
 
-public record UserResponse(
-    Long userId,
+import com.thaiglocal.webclient.dto.enums.RoleName;
+
+
+public record UserRequest(
+    // Long userId,
     String username,
     String email,
     String firstName,
     String lastName,    
-    // String password,
+    String password,
     RoleName role,
     String telephone,
     String address,
     LocalDateTime birthDate,
-    LocalDateTime createdAt,
-    LocalDateTime deleteAt,
+    // Date createdAt,
+    // Date deleteAt,
     Boolean isActive
 ) {
 }
