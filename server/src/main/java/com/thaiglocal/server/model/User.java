@@ -2,12 +2,16 @@ package com.thaiglocal.server.model;
 
 import java.time.LocalDateTime;
 import java.util.List;
+
+import org.hibernate.annotations.CreationTimestamp;
+
 import java.util.ArrayList;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.thaiglocal.server.model.enums.RoleName;
 
 import jakarta.persistence.*;
-
+import jakarta.validation.constraints.Email;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -25,19 +29,48 @@ public class User {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long userId;
+
+    @Column(nullable = false, length = 150)
     private String username;
-    private String password;
+
+    @Email
+    @Column(nullable = false)
     private String email;
+
+    @Column
     private String firstName;
+
+    @Column
     private String lastName;
     
+    @JsonIgnore
+    @Column(nullable = false)
+    private String password;
+
     @Enumerated(EnumType.STRING)
-    private RoleName role;
+    @Builder.Default
+    @Column
+    private RoleName role = RoleName.USER;
+
+    @Column
     private String telephone;
+
+    @Column
     private String address;
-    private LocalDateTime birthdate;
+
+    @Column
+    private LocalDateTime birthDate;
+
+    @CreationTimestamp
+    @Column(nullable = false)
     private LocalDateTime createdAt;
-    private LocalDateTime deletedAt;
+
+    @Column 
+    private LocalDateTime deleteAt;
+
+    @Builder.Default
+    @Column(nullable = false)
+    private Boolean isActive = true;
 
     // relationship
     // one user can belong to many centers (through CenterBelongUser)
