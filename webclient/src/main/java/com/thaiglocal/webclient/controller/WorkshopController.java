@@ -13,7 +13,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.thaiglocal.webclient.dto.request.WorkshopRequest;
+import com.thaiglocal.webclient.dto.request.WorkshopCreateRequest;
+import com.thaiglocal.webclient.dto.request.WorkshopUpdateRequest;
 import com.thaiglocal.webclient.dto.response.WorkshopResponse;
 import com.thaiglocal.webclient.service.WorkshopService;
 
@@ -66,14 +67,14 @@ public class WorkshopController {
     }
 
     @PostMapping("/create")
-    public Mono<ResponseEntity<Void>> create(@RequestBody WorkshopRequest request,
+    public Mono<ResponseEntity<Void>> create(@RequestBody WorkshopCreateRequest request,
             @RequestHeader(value = "Cookie", required = false) String cookieHeader) {
         return workshopService.create(request, cookieHeader)
                 .thenReturn(ResponseEntity.status(HttpStatus.CREATED).build());
     }
 
     @PatchMapping("/update/{workshopId}")
-    public Mono<ResponseEntity<Void>> update(@PathVariable Long workshopId, @RequestBody WorkshopRequest request,
+    public Mono<ResponseEntity<Void>> update(@PathVariable Long workshopId, @RequestBody WorkshopUpdateRequest request,
             @RequestHeader(value = "Cookie", required = false) String cookieHeader) {
         return workshopService.update(workshopId, request, cookieHeader)
                 .thenReturn(ResponseEntity.ok().build());

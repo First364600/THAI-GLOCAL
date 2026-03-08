@@ -6,7 +6,8 @@ import org.springframework.http.HttpStatusCode;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
 
-import com.thaiglocal.webclient.dto.request.WorkshopRequest;
+import com.thaiglocal.webclient.dto.request.WorkshopCreateRequest;
+import com.thaiglocal.webclient.dto.request.WorkshopUpdateRequest;
 import com.thaiglocal.webclient.dto.response.WorkshopResponse;
 
 import reactor.core.publisher.Flux;
@@ -111,7 +112,7 @@ public class WorkshopService {
                                 .bodyToFlux(WorkshopResponse.class);
         }
 
-        public Mono<Void> create(WorkshopRequest request, String cookieHeader) {
+        public Mono<Void> create(WorkshopCreateRequest request, String cookieHeader) {
                 return workshopWebClient
                                 .post()
                                 .uri("/api/workshops/create")
@@ -127,7 +128,7 @@ public class WorkshopService {
                                 .bodyToMono(Void.class);
         }
 
-        public Mono<Void> update(Long workshopId, WorkshopRequest request, String cookieHeader) {
+        public Mono<Void> update(Long workshopId, WorkshopUpdateRequest request, String cookieHeader) {
                 return workshopWebClient
                                 .patch()
                                 .uri("/api/workshops/update/{workshopId}", workshopId)

@@ -2,7 +2,7 @@ package com.thaiglocal.webclient.dto.request;
 
 import java.util.List;
 
-public record WorkshopRequest(
+public record WorkshopCreateRequest(
         String workshopName,
         String description,
         Double price,
