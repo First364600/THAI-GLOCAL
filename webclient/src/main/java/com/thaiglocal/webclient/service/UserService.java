@@ -5,6 +5,7 @@ import org.springframework.http.HttpStatusCode;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
 
+import com.thaiglocal.webclient.dto.request.ForgetPasswordRequest;
 import com.thaiglocal.webclient.dto.request.RoleRequest;
 import com.thaiglocal.webclient.dto.request.SignInRequest;
 import com.thaiglocal.webclient.dto.request.SignUpRequest;
@@ -97,6 +98,15 @@ public class UserService {
             .body(Mono.just(roleRequest), RoleRequest.class)
             .retrieve()
             .bodyToMono(UserResponse.class);
+    }
+
+    public Mono<String> forgetPassword(ForgetPasswordRequest request) {
+        return webClient.post()
+            .uri("/forget-password")
+            .header("Content-Type", "application/json")
+            .body(Mono.just(request), ForgetPasswordRequest.class)
+            .retrieve()
+            .bodyToMono(String.class);
     }
 }
 
