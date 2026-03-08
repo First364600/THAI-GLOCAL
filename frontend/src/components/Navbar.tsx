@@ -32,7 +32,7 @@ export function Navbar() {
   const initials = user
     ? ([user.firstName, user.lastName].filter(Boolean).join(" ") || user.username || user.email)
         .split(" ")
-        .map((w) => w[0])
+        .map((w: string) => w[0])
         .slice(0, 2)
         .join("")
         .toUpperCase()

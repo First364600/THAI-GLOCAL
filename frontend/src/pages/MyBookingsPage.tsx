@@ -32,7 +32,7 @@ export function MyBookingsPage() {
   const user = useAuthStore((s) => s.user);
   const bookings = useBookingStore((s) => s.bookings);
   const cancelBooking = useBookingStore((s) => s.cancelBooking);
-  const requestCancellation = useBookingStore((s) => s.requestCancellation);
+  const requestCancellation = useBookingStore((s) => s.requestCancelBooking);
   const [tab, setTab] = useState<"upcoming" | "all">("upcoming");
   const [cancelId, setCancelId] = useState<string | null>(null);
 
@@ -225,7 +225,7 @@ export function MyBookingsPage() {
                       {(booking as any).status === "cancellation_requested" && (booking as any).cancelRequestedBy === "center" && (
                          <div className="flex gap-2">
                            <button onClick={() => {
-                             useBookingStore.getState().approveCancellation((booking as any).id);
+                             useBookingStore.getState().approveCancelBooking((booking as any).id);
                            }} className="px-3 py-1 bg-red-50 text-red-600 rounded text-xs font-semibold">Approve Cancellation</button>
                          </div>
                       )}

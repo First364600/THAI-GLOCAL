@@ -1,7 +1,10 @@
 ﻿import { useState } from "react";
 import { Link, useNavigate } from "react-router";
-import { Eye, EyeOff, BookOpen, UserPlus } from "lucide-react";
+import { Eye, EyeOff, BookOpen, UserPlus, User, IdCard, Phone, MapPin } from "lucide-react";
 import useAuthStore from "../store/authStore";
+
+const inputCls = "w-full pl-9 pr-4 py-2.5 rounded-xl border border-stone-200 focus:border-amber-400 focus:ring-2 focus:ring-amber-100 outline-none transition text-stone-800 text-sm";
+const labelCls = "block text-sm font-medium text-stone-700 mb-1.5";
 
 export function SignUpPage() {
   const navigate = useNavigate();
@@ -11,7 +14,11 @@ export function SignUpPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirm, setConfirm] = useState("");
-  const [role, setRole] = useState("USER");
+
+  const [firstName, setFirstName] = useState("");
+  const [lastName, setLastName] = useState("");
+  const [telephone, setTelephone] = useState("");
+  const [address, setAddress] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
@@ -39,8 +46,16 @@ export function SignUpPage() {
 
     setLoading(true);
     try {
-      await signup({ username: username.trim(), email: email.trim(), password, role });
-      navigate("/create-profile", { replace: true });
+      await signup({
+        username: username.trim(),
+        email: email.trim(),
+        password,
+        firstName: firstName.trim(),
+        lastName: lastName.trim(),
+        telephone: telephone.trim(),
+        address: address.trim(),
+      });
+      navigate("/", { replace: true });
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : "Sign up failed.");
     } finally {
@@ -70,11 +85,43 @@ export function SignUpPage() {
 
           <form onSubmit={handleSubmit} className="flex flex-col gap-4">
 
+            {/* First / Last name */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div>
+                <label htmlFor="su-firstname" className={labelCls}>First name</label>
+                <div className="relative">
+                  <User className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-stone-400" />
+                  <input
+                    id="su-firstname"
+                    type="text"
+                    required
+                    value={firstName}
+                    onChange={(e) => setFirstName(e.target.value)}
+                    placeholder="Somchai"
+                    className={inputCls}
+                  />
+                </div>
+              </div>
+              <div>
+                <label htmlFor="su-lastname" className={labelCls}>Last name</label>
+                <div className="relative">
+                  <IdCard className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-stone-400" />
+                  <input
+                    id="su-lastname"
+                    type="text"
+                    required
+                    value={lastName}
+                    onChange={(e) => setLastName(e.target.value)}
+                    placeholder="Jaidee"
+                    className={inputCls}
+                  />
+                </div>
+              </div>
+            </div>
+
             {/* Username */}
             <div>
-              <label htmlFor="username" className="block text-sm font-medium text-stone-700 mb-1.5">
-                Username
-              </label>
+              <label htmlFor="username" className={labelCls}>Username</label>
               <input
                 id="username"
                 type="text"
@@ -89,9 +136,7 @@ export function SignUpPage() {
 
             {/* Email */}
             <div>
-              <label htmlFor="email" className="block text-sm font-medium text-stone-700 mb-1.5">
-                Email address
-              </label>
+              <label htmlFor="email" className={labelCls}>Email address</label>
               <input
                 id="email"
                 type="email"
@@ -149,21 +194,38 @@ export function SignUpPage() {
               />
             </div>
 
-            {/* Role */}
+            {/* Telephone */}
             <div>
-              <label htmlFor="role" className="block text-sm font-medium text-stone-700 mb-1.5">
-                Account Role
-              </label>
-              <select
-                id="role"
-                value={role}
-                onChange={(e) => setRole(e.target.value)}
-                className="w-full px-4 py-2.5 rounded-xl border border-stone-200 focus:border-amber-400 focus:ring-2 focus:ring-amber-100 outline-none transition text-stone-800 text-sm bg-white"
-              >
-                <option value="USER">Standard User</option>
-                <option value="CENTER_ADMIN">Center Admin</option>
-                <option value="CENTER_STAFF">Center Staff</option>
-              </select>
+              <label htmlFor="su-tel" className={labelCls}>Telephone</label>
+              <div className="relative">
+                <Phone className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-stone-400" />
+                <input
+                  id="su-tel"
+                  type="tel"
+                  required
+                  value={telephone}
+                  onChange={(e) => setTelephone(e.target.value)}
+                  placeholder="e.g. 081-234-5678"
+                  className={inputCls}
+                />
+              </div>
+            </div>
+
+            {/* Address */}
+            <div>
+              <label htmlFor="su-address" className={labelCls}>Address</label>
+              <div className="relative">
+                <MapPin className="absolute left-3 top-3 w-4 h-4 text-stone-400" />
+                <textarea
+                  id="su-address"
+                  required
+                  value={address}
+                  onChange={(e) => setAddress(e.target.value)}
+                  rows={3}
+                  placeholder="123 Moo 4, Tambon Mae Rim, Chiang Mai 50180"
+                  className="w-full pl-9 pr-4 py-2.5 rounded-xl border border-stone-200 focus:border-amber-400 focus:ring-2 focus:ring-amber-100 outline-none transition text-stone-800 text-sm resize-none"
+                />
+              </div>
             </div>
 
             {/* Submit */}

@@ -20,6 +20,8 @@ interface BookingState {
   fetchUserBookings: (userId: string) => Promise<void>;
   createBooking: (userId: string, activityId: string, customOptions?: Record<string, any>) => Promise<Booking | null>;      
   cancelBooking: (bookingId: string) => Promise<void>;
+  requestCancelBooking: (bookingId: string, requestedBy: string) => Promise<void>;
+  approveCancelBooking: (bookingId: string) => Promise<void>;
   verifyBooking: (qrData: string) => Promise<boolean>;
 }
 
@@ -47,7 +49,7 @@ const useBookingStore = create<BookingState>((set, get) => ({
       const payload = { ...customOptions };
       const res = await apiClient.post(`/client/activity-registers/create/activity/${activityId}/user/${userId}`, payload);
       
-      const newBooking = res;
+      const newBooking = res as unknown as Booking;
       set((state) => ({ bookings: [...state.bookings, newBooking] }));
       return newBooking;
     } catch (err: any) {
@@ -75,7 +77,15 @@ const useBookingStore = create<BookingState>((set, get) => ({
   verifyBooking: async (qrData) => {
     console.warn("verifyBooking mapping missing in backend");
     return true; 
-  }
+  },
+
+  requestCancelBooking: async (bookingId) => {
+    await get().cancelBooking(bookingId);
+  },
+
+  approveCancelBooking: async (bookingId) => {
+    await get().cancelBooking(bookingId);
+  },
 }));
 
 export default useBookingStore;

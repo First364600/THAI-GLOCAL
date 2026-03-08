@@ -12,6 +12,8 @@ import com.thaiglocal.webclient.dto.response.CenterResponse;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+import java.util.function.Function;
+
 @Service
 public class CenterService {
 
@@ -30,12 +32,8 @@ public class CenterService {
                                 .uri("/api/centers")
                                 .headers(h -> addCookie(h, cookieHeader))
                                 .retrieve()
-                                .onStatus(HttpStatusCode::is4xxClientError,
-                                                cr -> Mono.error(new RuntimeException(
-                                                                "Client error during getAllCenters")))
-                                .onStatus(HttpStatusCode::is5xxServerError,
-                                                cr -> Mono.error(new RuntimeException(
-                                                                "Server error during getAllCenters")))
+                                .onStatus(HttpStatusCode::is4xxClientError, cr -> clientError(cr, "getAllCenters"))
+                                .onStatus(HttpStatusCode::is5xxServerError, cr -> serverError(cr, "getAllCenters"))
                                 .bodyToFlux(CenterResponse.class);
         }
 
@@ -48,12 +46,8 @@ public class CenterService {
                                                 .build())
                                 .headers(h -> addCookie(h, cookieHeader))
                                 .retrieve()
-                                .onStatus(HttpStatusCode::is4xxClientError,
-                                                cr -> Mono.error(new RuntimeException(
-                                                                "Client error during searchCentersByName")))
-                                .onStatus(HttpStatusCode::is5xxServerError,
-                                                cr -> Mono.error(new RuntimeException(
-                                                                "Server error during searchCentersByName")))
+                                .onStatus(HttpStatusCode::is4xxClientError, cr -> clientError(cr, "searchCentersByName"))
+                                .onStatus(HttpStatusCode::is5xxServerError, cr -> serverError(cr, "searchCentersByName"))
                                 .bodyToFlux(CenterResponse.class);
         }
 
@@ -63,12 +57,8 @@ public class CenterService {
                                 .uri("/api/centers/admin/{userId}", userId)
                                 .headers(h -> addCookie(h, cookieHeader))
                                 .retrieve()
-                                .onStatus(HttpStatusCode::is4xxClientError,
-                                                cr -> Mono.error(new RuntimeException(
-                                                                "Client error during getCentersByAdminId")))
-                                .onStatus(HttpStatusCode::is5xxServerError,
-                                                cr -> Mono.error(new RuntimeException(
-                                                                "Server error during getCentersByAdminId")))
+                                .onStatus(HttpStatusCode::is4xxClientError, cr -> clientError(cr, "getCentersByAdminId"))
+                                .onStatus(HttpStatusCode::is5xxServerError, cr -> serverError(cr, "getCentersByAdminId"))
                                 .bodyToFlux(CenterResponse.class);
         }
 
@@ -78,12 +68,8 @@ public class CenterService {
                                 .uri("/api/centers/{centerId}", centerId)
                                 .headers(h -> addCookie(h, cookieHeader))
                                 .retrieve()
-                                .onStatus(HttpStatusCode::is4xxClientError,
-                                                cr -> Mono.error(new RuntimeException(
-                                                                "Client error during getCenterById")))
-                                .onStatus(HttpStatusCode::is5xxServerError,
-                                                cr -> Mono.error(new RuntimeException(
-                                                                "Server error during getCenterById")))
+                                .onStatus(HttpStatusCode::is4xxClientError, cr -> clientError(cr, "getCenterById"))
+                                .onStatus(HttpStatusCode::is5xxServerError, cr -> serverError(cr, "getCenterById"))
                                 .bodyToMono(CenterResponse.class);
         }
 
@@ -94,12 +80,8 @@ public class CenterService {
                                 .headers(h -> addCookie(h, cookieHeader))
                                 .bodyValue(request)
                                 .retrieve()
-                                .onStatus(HttpStatusCode::is4xxClientError,
-                                                cr -> Mono.error(new RuntimeException(
-                                                                "Client error during createCenter")))
-                                .onStatus(HttpStatusCode::is5xxServerError,
-                                                cr -> Mono.error(new RuntimeException(
-                                                                "Server error during createCenter")))
+                                .onStatus(HttpStatusCode::is4xxClientError, cr -> clientError(cr, "createCenter"))
+                                .onStatus(HttpStatusCode::is5xxServerError, cr -> serverError(cr, "createCenter"))
                                 .bodyToMono(Void.class);
         }
 
@@ -109,12 +91,8 @@ public class CenterService {
                                 .uri("/api/centers/{centerId}/add-admin/{userId}", centerId, userId)
                                 .headers(h -> addCookie(h, cookieHeader))
                                 .retrieve()
-                                .onStatus(HttpStatusCode::is4xxClientError,
-                                                cr -> Mono.error(new RuntimeException(
-                                                                "Client error during addCenterAdmin")))
-                                .onStatus(HttpStatusCode::is5xxServerError,
-                                                cr -> Mono.error(new RuntimeException(
-                                                                "Server error during addCenterAdmin")))
+                                .onStatus(HttpStatusCode::is4xxClientError, cr -> clientError(cr, "addCenterAdmin"))
+                                .onStatus(HttpStatusCode::is5xxServerError, cr -> serverError(cr, "addCenterAdmin"))
                                 .bodyToMono(Void.class);
         }
 
@@ -124,12 +102,8 @@ public class CenterService {
                                 .uri("/api/centers/{centerId}/add-staff/{userId}", centerId, userId)
                                 .headers(h -> addCookie(h, cookieHeader))
                                 .retrieve()
-                                .onStatus(HttpStatusCode::is4xxClientError,
-                                                cr -> Mono.error(new RuntimeException(
-                                                                "Client error during addCenterStaff")))
-                                .onStatus(HttpStatusCode::is5xxServerError,
-                                                cr -> Mono.error(new RuntimeException(
-                                                                "Server error during addCenterStaff")))
+                                .onStatus(HttpStatusCode::is4xxClientError, cr -> clientError(cr, "addCenterStaff"))
+                                .onStatus(HttpStatusCode::is5xxServerError, cr -> serverError(cr, "addCenterStaff"))
                                 .bodyToMono(Void.class);
         }
 
@@ -140,12 +114,8 @@ public class CenterService {
                                 .headers(h -> addCookie(h, cookieHeader))
                                 .bodyValue(request)
                                 .retrieve()
-                                .onStatus(HttpStatusCode::is4xxClientError,
-                                                cr -> Mono.error(new RuntimeException(
-                                                                "Client error during updateCenter")))
-                                .onStatus(HttpStatusCode::is5xxServerError,
-                                                cr -> Mono.error(new RuntimeException(
-                                                                "Server error during updateCenter")))
+                                .onStatus(HttpStatusCode::is4xxClientError, cr -> clientError(cr, "updateCenter"))
+                                .onStatus(HttpStatusCode::is5xxServerError, cr -> serverError(cr, "updateCenter"))
                                 .bodyToMono(Void.class);
         }
 
@@ -155,12 +125,8 @@ public class CenterService {
                                 .uri("/api/centers/delete/{centerId}", centerId)
                                 .headers(h -> addCookie(h, cookieHeader))
                                 .retrieve()
-                                .onStatus(HttpStatusCode::is4xxClientError,
-                                                cr -> Mono.error(new RuntimeException(
-                                                                "Client error during deleteCenter")))
-                                .onStatus(HttpStatusCode::is5xxServerError,
-                                                cr -> Mono.error(new RuntimeException(
-                                                                "Server error during deleteCenter")))
+                                .onStatus(HttpStatusCode::is4xxClientError, cr -> clientError(cr, "deleteCenter"))
+                                .onStatus(HttpStatusCode::is5xxServerError, cr -> serverError(cr, "deleteCenter"))
                                 .bodyToMono(Void.class);
         }
 
@@ -168,5 +134,20 @@ public class CenterService {
                 if (cookieHeader != null && !cookieHeader.isBlank()) {
                         headers.add("Cookie", cookieHeader);
                 }
+        }
+
+        /** Extracts the response body and includes it in the exception message for easier debugging. */
+        private Mono<? extends Throwable> serverError(org.springframework.web.reactive.function.client.ClientResponse cr, String operation) {
+                return cr.bodyToMono(String.class)
+                                .defaultIfEmpty("<empty body>")
+                                .flatMap(body -> Mono.error(new RuntimeException(
+                                                "[" + operation + "] Server error: " + body)));
+        }
+
+        private Mono<? extends Throwable> clientError(org.springframework.web.reactive.function.client.ClientResponse cr, String operation) {
+                return cr.bodyToMono(String.class)
+                                .defaultIfEmpty("<empty body>")
+                                .flatMap(body -> Mono.error(new RuntimeException(
+                                                "[" + operation + "] Client error: " + body)));
         }
 }

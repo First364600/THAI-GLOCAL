@@ -604,8 +604,7 @@ export function MyCenterPage() {
     if (drawer === "editCenter" && activeCenter) {
       store.updateCenter(activeCenter.id, data);
     } else {
-      const newCenter = (store as any).createCenter({ ...data, ownerId: user.id });
-      setActiveCenterId(newCenter.id);
+      store.createCenter(String(user.id), data);
     }
     setDrawer("none");
     setCenterExpanded(false);

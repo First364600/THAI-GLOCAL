@@ -19,9 +19,11 @@ export interface AdminUser {
 export interface AdminCenter {
   id: string;
   name: string;
+  nameTh?: string;
   owner: string;
   location?: string;
   province?: string;
+  description?: string;
   status: "pending" | "approved" | "rejected";
   createdAt: string;
 }
@@ -64,9 +66,11 @@ interface AdminState {
 
   updateUserStatus: (id: string, status: "active" | "inactive" | "suspended") => Promise<void>;
   updateUserRole: (id: string, role: string) => Promise<void>;
+  updateUserInfo: (id: string, data: any) => Promise<void>;
   deleteUser: (id: string) => Promise<void>;
 
-  updateCenterStatus: (id: string, status: "pending" | "approved" | "rejected") => Promise<void>;
+  updateCenterStatus: (id: string, status: string) => Promise<void>;
+  updateAdminCenter: (id: string, data: any) => Promise<void>;
   deleteCenter: (id: string) => Promise<void>;
 
   updateRegistrationRequestStatus: (id: number, status: "pending" | "approved" | "rejected") => Promise<void>;
@@ -142,6 +146,15 @@ const useAdminStore = create<AdminState>((set, get) => ({
     } catch (e) { console.error(e); }
   },
 
+  updateUserInfo: async (id, data) => {
+    try {
+      await apiClient.patch(`/client/users/admin/${id}`, data);
+      set((state) => ({
+        users: state.users.map((u) => (u.id === id ? { ...u, ...data } : u)),
+      }));
+    } catch (e) { console.error(e); }
+  },
+
   deleteUser: async (id) => {
     try {
       await apiClient.delete(`/client/users/admin/${id}`);
@@ -155,9 +168,32 @@ const useAdminStore = create<AdminState>((set, get) => ({
     try {
        await apiClient.patch(`/client/centers/update/${id}`, { status });
        set((state) => ({
-        centers: state.centers.map((c) => (c.id === id ? { ...c, status } : c)),
+        centers: state.centers.map((c) => (c.id === id ? { ...c, status: status as AdminCenter['status'] } : c)),
        }));
     } catch(e) { console.error(e); }
+  },
+
+  updateAdminCenter: async (id, data) => {
+    try {
+      const payload: any = {};
+      if (data.name !== undefined) payload.centerName = data.name;
+      if (data.nameTh !== undefined) payload.nameTh = data.nameTh;
+      if (data.description !== undefined) payload.description = data.description;
+      if (data.location !== undefined) payload.subDistrict = data.location;
+      if (data.province !== undefined) payload.province = data.province;
+      if (data.location || data.province) {
+        payload.address = [data.location, data.province].filter(Boolean).join(', ');
+      }
+      // pass through any already-DTO-named fields
+      ['email','facebook','webSite','website','line','lineId','googleMapLink','leaderFirstName','leaderLastName','leaderTelephone','centerImages','telephones'].forEach(f => {
+        if (data[f] !== undefined) payload[f] = data[f];
+      });
+      await apiClient.patch(`/client/centers/update/${id}`, payload);
+      set((state) => ({
+        centers: state.centers.map((c) => (c.id === id ? { ...c, ...data } : c)),
+        adminCenters: state.adminCenters.map((c) => (c.id === id ? { ...c, ...data } : c)),
+      }));
+    } catch (e) { console.error(e); }
   },
 
   deleteCenter: async (id) => {
@@ -183,7 +219,7 @@ const useAdminStore = create<AdminState>((set, get) => ({
   getSystemLogs: async () => {
     try {
       const res = await apiClient.get(`/client/admin/logs`);
-      return res.data;
+      return Array.isArray(res) ? res : [];
     } catch (error) { console.error("Logs fetch failed", error); throw error; }
   },
 }));

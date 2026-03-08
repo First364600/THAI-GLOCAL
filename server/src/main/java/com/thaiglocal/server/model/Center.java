@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import jakarta.persistence.*;
+import org.hibernate.annotations.CreationTimestamp;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -34,6 +35,7 @@ public class Center {
     private String line;
     private String facebook;
     private String webSite;
+    @CreationTimestamp
     private LocalDateTime createdAt;
     private LocalDateTime deletedAt;
     private String leaderFirstName;

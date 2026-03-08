@@ -19,7 +19,7 @@ interface AuthState {
   login: (userData: any) => Promise<void>;
   signup: (userData: any) => Promise<void>;
   updateProfile: (userData: any) => Promise<void>;
-  logout: () => void;
+  logout: () => Promise<void>;
   forgotPassword: (email: string) => Promise<void>;
 }
 
@@ -49,7 +49,10 @@ const useAuthStore = create<AuthState>()(
               username: userData.username,
               email: userData.email,
               password: userData.password,
-              role: (userData.role || "USER").toUpperCase()
+              firstName: userData.firstName || "",
+              lastName: userData.lastName || "",
+              telephone: userData.telephone || "",
+              address: userData.address || "",
             };
             const response = await apiClient.post("/api/signup", signupData);
             // Do not immediately authenticate after signup so the user is redirected to login
@@ -69,11 +72,22 @@ const useAuthStore = create<AuthState>()(
          }
       },
       updateProfile: async (userData: any) => {
-        set((state) => ({ user: { ...state.user, ...userData } as User }));
+        try {
+          const res: any = await apiClient.patch("/client/users/me", userData);
+          set((state) => ({ user: { ...state.user, ...res } as User }));
+        } catch (e: any) {
+          console.error("Update profile failed", e);
+          throw e;
+        }
       },
-      logout: () => {
-        alert("Logout triggered - Clearing Session");
-        set({ isAuthenticated: false, user: null });
+      logout: async () => {
+        try {
+          await apiClient.post("/api/signout");
+        } catch (e) {
+          console.error("Signout request failed", e);
+        } finally {
+          set({ isAuthenticated: false, user: null });
+        }
       },
       forgotPassword: async (email: string) => {
          try {

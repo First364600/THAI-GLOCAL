@@ -17,6 +17,7 @@ import {
 } from "lucide-react";
 import { activities, centers, Session } from "../data/mockData";
 import useBookingStore from "../store/bookingStore";
+import useAuthStore from "../store/authStore";
 import { toast } from "sonner";
 import { ImageCarousel } from "../components/ImageCarousel";
 
@@ -35,7 +36,8 @@ function BookingModal({
   onClose: () => void;
   onSuccess: (bookingId: string) => void;
 }) {
-  const addBooking = useBookingStore((s) => s.addBooking);
+  const createBooking = useBookingStore((s) => s.createBooking);
+  const user = useAuthStore((s) => s.user);
   const [form, setForm] = useState({
     name: "",
     email: "",
@@ -71,19 +73,9 @@ function BookingModal({
     await new Promise((r) => setTimeout(r, 1200));
 
     const bookingId = `BK${Date.now().toString().slice(-6)}`;
-    addBooking({
-      id: bookingId,
-      activityId,
-      sessionId: session.id,
-      name: form.name,
-      email: form.email,
-      phone: form.phone,
-      participants: form.participants,
-      totalPrice,
-      status: "confirmed",
-      createdAt: new Date().toISOString(),
-      notes: form.notes,
-    });
+    if (user?.id) {
+      await createBooking(user.id, activityId, { numberOfRegister: form.participants });
+    }
 
     setLoading(false);
     onSuccess(bookingId);

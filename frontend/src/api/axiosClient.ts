@@ -10,10 +10,19 @@ export const apiClient = axios.create({
   },
 });
 
-// Response interceptor to easily extract data or catch format errors
+// Response interceptor: extract data on success, handle 401 globally
 apiClient.interceptors.response.use(
   (response) => response.data,
-  (error) => Promise.reject(error)
+  (error) => {
+    if (error.response?.status === 401) {
+      // Clear persisted auth state and redirect to login
+      localStorage.removeItem('tg_auth');
+      if (window.location.pathname !== '/login') {
+        window.location.href = '/login';
+      }
+    }
+    return Promise.reject(error);
+  }
 );
 
 export default apiClient;

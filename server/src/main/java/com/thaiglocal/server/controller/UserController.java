@@ -66,16 +66,16 @@ public class UserController {
 
         ResponseCookie accessCookie = ResponseCookie.from(ACCESS_TOKEN, response.getAccessToken())
             .httpOnly(true)
-            .secure(true)
-            .sameSite("Strict")
+            .secure(false)
+            .sameSite("Lax")
             .path("/")
             .maxAge(Duration.ofMinutes(15))
             .build();
 
         ResponseCookie refreshCookie = ResponseCookie.from(REFRESH_TOKEN, response.getRefreshToken())
             .httpOnly(true)
-            .secure(true)
-            .sameSite("Strict")
+            .secure(false)
+            .sameSite("Lax")
             .path("/")
             .maxAge(Duration.ofDays(7))
             .build();
