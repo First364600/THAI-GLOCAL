@@ -33,6 +33,7 @@ public class ActivityService {
                         .username(activityRegister.getUser().getUsername())
                         .numberOfRegister(activityRegister.getNumberOfRegister())
                         .status(activityRegister.getStatus())
+                        .totalPrice(activityRegister.getNumberOfRegister() * activity.getPrice())
                         .build())
                 .toList();
                 

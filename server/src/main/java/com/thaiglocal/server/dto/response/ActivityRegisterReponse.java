@@ -14,4 +14,5 @@ public class ActivityRegisterReponse {
     private String username;
     private Integer numberOfRegister;
     private ActivityRegisterStatus status;
+    private double totalPrice;
 }
