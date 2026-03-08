@@ -1,7 +1,7 @@
 package com.thaiglocal.server.dto.request;
 
 import java.time.LocalDateTime;
-import com.thaiglocal.server.model.enums.RoleName;;
+import com.thaiglocal.server.model.enums.RoleName;
 
 public record UserRequest(
     // Long userId,

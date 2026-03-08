@@ -193,7 +193,7 @@ function RequestDetail({
   req: CenterRegistrationRequest;
   onBack: () => void;
 }) {
-  const updateStatus = useAdminStore((s: any) => s.updateUserStatus);
+  const updateStatus = useAdminStore((s) => s.updateRegistrationRequestStatus);
   const { t } = useTranslation();
   const d = t.requests.detail;
 
@@ -436,7 +436,7 @@ function UserManagementTab() {
               const isActive = u.status !== "suspended";
               return (
                 <tr key={u.id} className={`border-b border-stone-100 hover:bg-stone-50 transition-colors ${!isActive ? "opacity-60" : ""}`}>
-                  <td className="p-4 text-stone-400 text-xs font-mono max-w-[120px] truncate" title={u.id}>
+                  <td className="p-4 text-stone-400 text-xs font-mono max-w-30 truncate" title={u.id}>
                     {u.id}
                   </td>
                   <td className="p-4 font-medium text-stone-900">{getDisplayName(u)}</td>

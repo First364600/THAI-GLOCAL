@@ -2,12 +2,17 @@
 import { create } from "zustand";
 import apiClient from "../api/axiosClient";
 
+export type CenterStatus = "active" | "suspended" | "disabled";
+
 export interface AdminUser {
   id: string;
   name: string;
+  firstName?: string;
+  lastName?: string;
+  username?: string;
   email: string;
   role: string;
-  status: "active" | "inactive";
+  status: "active" | "inactive" | "suspended";
   lastLogin: string;
 }
 
@@ -15,23 +20,38 @@ export interface AdminCenter {
   id: string;
   name: string;
   owner: string;
+  location?: string;
+  province?: string;
   status: "pending" | "approved" | "rejected";
   createdAt: string;
 }
 
-export interface RegistrationRequest {
+export interface CenterRegistrationRequest {
   id: number;
-  centerName: string;
-  requesterId: number;
-  status: "PENDING" | "APPROVED" | "REJECTED";
-  details: string;
+  name: string;
+  status: "pending" | "approved" | "rejected";
   createdAt: string;
+  address: string;
+  telephones: string[];
+  email: string;
+  lineId?: string;
+  facebook?: string;
+  website?: string;
+  providers?: string[];
+  communityLeaderFirstName: string;
+  communityLeaderLastName: string;
+  communityLeaderTelephone: string;
 }
+
+/** @deprecated Use CenterRegistrationRequest instead */
+export type RegistrationRequest = CenterRegistrationRequest;
 
 interface AdminState {
   users: AdminUser[];
   centers: AdminCenter[];
-  registrationRequests: RegistrationRequest[];
+  adminCenters: AdminCenter[];
+  centerStatuses: Record<string, CenterStatus>;
+  registrationRequests: CenterRegistrationRequest[];
   systemStats: {
     totalUsers: number;
     activeCenters: number;
@@ -40,22 +60,25 @@ interface AdminState {
   };
 
   fetchAdminData: () => Promise<void>;
+  syncUsers: () => Promise<void>;
 
-  updateUserStatus: (id: string, status: "active" | "inactive") => Promise<void>;
+  updateUserStatus: (id: string, status: "active" | "inactive" | "suspended") => Promise<void>;
   updateUserRole: (id: string, role: string) => Promise<void>;
   deleteUser: (id: string) => Promise<void>;
 
   updateCenterStatus: (id: string, status: "pending" | "approved" | "rejected") => Promise<void>;
   deleteCenter: (id: string) => Promise<void>;
-  
-  updateRegistrationRequestStatus: (id: number, status: "PENDING" | "APPROVED" | "REJECTED") => Promise<void>;
+
+  updateRegistrationRequestStatus: (id: number, status: "pending" | "approved" | "rejected") => Promise<void>;
 
   getSystemLogs: () => Promise<any[]>;
 }
 
-const useAdminStore = create<AdminState>((set) => ({
+const useAdminStore = create<AdminState>((set, get) => ({
   users: [],
   centers: [],
+  adminCenters: [],
+  centerStatuses: {},
   registrationRequests: [],
   systemStats: {
     totalUsers: 0,
@@ -63,6 +86,8 @@ const useAdminStore = create<AdminState>((set) => ({
     revenue: 0,
     pendingApprovals: 0,
   },
+
+  syncUsers: async () => { await get().fetchAdminData(); },
 
   fetchAdminData: async () => {
     try {
@@ -76,15 +101,22 @@ const useAdminStore = create<AdminState>((set) => ({
       const centers = centersRes.status === "fulfilled" ? centersRes.value.data : [];
       const requests = requestsRes.status === "fulfilled" ? requestsRes.value.data : [];
 
+      const statuses: Record<string, CenterStatus> = {};
+      centers.forEach((c: any) => { statuses[c.id] = c.centerStatus ?? "active"; });
+
       set({
         users,
         centers,
+        adminCenters: centers,
+        centerStatuses: statuses,
         registrationRequests: requests,
         systemStats: {
           totalUsers: users.length,
           activeCenters: centers.filter((c: any) => c.status === "approved").length,
-          revenue: Math.floor(Math.random() * 50000), 
-          pendingApprovals: requests.filter((r: any) => r.status === "PENDING").length,
+          revenue: Math.floor(Math.random() * 50000),
+          pendingApprovals: requests.filter((r: any) =>
+            r.status === "PENDING" || r.status === "pending"
+          ).length,
         },
       });
     } catch (error) {
@@ -139,10 +171,12 @@ const useAdminStore = create<AdminState>((set) => ({
 
   updateRegistrationRequestStatus: async (id, status) => {
     try {
-       await apiClient.patch(`/client/admin/registration-requests/${id}/status`, { status });
-       set((state) => ({
-          registrationRequests: state.registrationRequests.map((r) => (r.id === id ? { ...r, status } : r)),
-       }));
+      await apiClient.patch(`/client/admin/registration-requests/${id}/status`, { status });
+      set((state) => ({
+        registrationRequests: state.registrationRequests.map((r) =>
+          r.id === id ? { ...r, status } : r
+        ),
+      }));
     } catch(e) { console.error(e); }
   },
 
