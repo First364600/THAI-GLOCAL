@@ -13,12 +13,11 @@ import org.springframework.web.context.request.ServletRequestAttributes;
 public class WebClientConfig {
 
     @Bean
-    public WebClient webClient() {
+    public WebClient.Builder webClientBuilder() {
         return WebClient.builder()
-            .baseUrl("http://localhost:8081/api")
             .defaultHeader("Content-Type", "application/json")
             .filter((request, next) -> {
-                // ดึง Cookie จาก Incoming Request แล้วส่งต่อไปยัง Server
+                // Forward incoming servlet cookies to downstream calls
                 ServletRequestAttributes attributes = (ServletRequestAttributes) RequestContextHolder.getRequestAttributes();
                 if (attributes != null) {
                     HttpServletRequest httpRequest = attributes.getRequest();
@@ -39,7 +38,13 @@ public class WebClientConfig {
                     }
                 }
                 return next.exchange(request);
-            })
+            });
+    }
+
+    @Bean
+    public WebClient webClient(WebClient.Builder builder) {
+        return builder
+            .baseUrl("http://localhost:8081/api")
             .build();
     }
 }

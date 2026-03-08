@@ -32,7 +32,7 @@ const useAuthStore = create<AuthState>()(
       login: async (userData: any) => {
         try {
           // Send request through gateway proxy directly into the WebClient /client pipeline 
-          const loginData = { email: userData.email, password: userData.password };
+         const loginData = { usernameOrEmail: userData.email, password: userData.password };
           const response = await apiClient.post("/client/users/signin", loginData);
           if (response && response.data) {
              set({ isAuthenticated: true, user: response.data });
@@ -42,31 +42,35 @@ const useAuthStore = create<AuthState>()(
         } catch (e: any) { console.error("Login failed", e); throw e; }
       },
 
-      signup: async (userData: any) => {
+        signup: async (userData: any) => {
          try {
-            const signupData = {
-              username: userData.username,
-              email: userData.email,
-              password: userData.password,
-              role: (userData.role || "USER").toUpperCase()
-            };
-            const response = await apiClient.post("/client/users/signup", signupData);
-            // Do not immediately authenticate after signup so the user is redirected to login
+          const signupData = {
+            username: userData.username,
+            email: userData.email,
+            password: userData.password,
+            firstName: userData.firstName,
+            lastName: userData.lastName,
+            telephone: userData.telephone,
+            address: userData.address,
+            birthDate: userData.birthDate ? `${userData.birthDate}T00:00:00` : undefined,
+          };
+          await apiClient.post("/client/users/signup", signupData);
+          // Do not immediately authenticate after signup so the user is redirected to login
          } catch(e: any) {
-            let errorMsg = "Registration failed. Please try again later.";
-            if (e.code === "ECONNREFUSED" || e.code === "ERR_NETWORK" || e.message === "Network Error") {
-                errorMsg = "Server is currently offline (Connection Refused).";
-            } else if (e.response?.status === 500) {
-                errorMsg = "Server is currently offline or encountered an error (500).";
-            } else if (e.response?.data?.message) {
-                errorMsg = e.response.data.message;
-            } else if (typeof e.response?.data === 'string') {
-                errorMsg = e.response.data;
-            }
-            console.error("SignUp Failed", e);
-            throw new Error(errorMsg);
+          let errorMsg = "Registration failed. Please try again later.";
+          if (e.code === "ECONNREFUSED" || e.code === "ERR_NETWORK" || e.message === "Network Error") {
+            errorMsg = "Server is currently offline (Connection Refused).";
+          } else if (e.response?.status === 500) {
+            errorMsg = "Server is currently offline or encountered an error (500).";
+          } else if (e.response?.data?.message) {
+            errorMsg = e.response.data.message;
+          } else if (typeof e.response?.data === 'string') {
+            errorMsg = e.response.data;
+          }
+          console.error("SignUp Failed", e);
+          throw new Error(errorMsg);
          }
-      },
+        },
       updateProfile: async (userData: any) => {
         set((state) => ({ user: { ...state.user, ...userData } as User }));
       },

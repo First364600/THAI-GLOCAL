@@ -8,9 +8,14 @@ export function SignUpPage() {
   const signup = useAuthStore((s) => s.signup);
 
   const [username, setUsername] = useState("");
+  const [firstName, setFirstName] = useState("");
+  const [lastName, setLastName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirm, setConfirm] = useState("");
+  const [telephone, setTelephone] = useState("");
+  const [address, setAddress] = useState("");
+  const [birthDate, setBirthDate] = useState("");
   const [role, setRole] = useState("USER");
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState("");
@@ -37,9 +42,45 @@ export function SignUpPage() {
       return;
     }
 
+    if (!firstName.trim() || !lastName.trim()) {
+      setError("First name and last name are required.");
+      return;
+    }
+
+    if (!telephone.trim()) {
+      setError("Telephone is required.");
+      return;
+    }
+
+    if (!address.trim()) {
+      setError("Address is required.");
+      return;
+    }
+
+    if (!birthDate) {
+      setError("Birth date is required.");
+      return;
+    }
+
+    const birthDateValue = new Date(birthDate);
+    if (Number.isNaN(birthDateValue.getTime()) || birthDateValue > new Date()) {
+      setError("Birth date must be in the past.");
+      return;
+    }
+
     setLoading(true);
     try {
-      await signup({ username: username.trim(), email: email.trim(), password, role });
+      await signup({
+        username: username.trim(),
+        firstName: firstName.trim(),
+        lastName: lastName.trim(),
+        email: email.trim(),
+        password,
+        telephone: telephone.trim(),
+        address: address.trim(),
+        birthDate,
+        role,
+      });
       navigate("/login", { replace: true });
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : "Sign up failed.");
@@ -83,6 +124,40 @@ export function SignUpPage() {
                 value={username}
                 onChange={(e) => setUsername(e.target.value)}
                 placeholder="your_username"
+                className="w-full px-4 py-2.5 rounded-xl border border-stone-200 focus:border-amber-400 focus:ring-2 focus:ring-amber-100 outline-none transition text-stone-800 text-sm"
+              />
+            </div>
+
+            {/* First Name */}
+            <div>
+              <label htmlFor="firstName" className="block text-sm font-medium text-stone-700 mb-1.5">
+                First name
+              </label>
+              <input
+                id="firstName"
+                type="text"
+                autoComplete="given-name"
+                required
+                value={firstName}
+                onChange={(e) => setFirstName(e.target.value)}
+                placeholder="John"
+                className="w-full px-4 py-2.5 rounded-xl border border-stone-200 focus:border-amber-400 focus:ring-2 focus:ring-amber-100 outline-none transition text-stone-800 text-sm"
+              />
+            </div>
+
+            {/* Last Name */}
+            <div>
+              <label htmlFor="lastName" className="block text-sm font-medium text-stone-700 mb-1.5">
+                Last name
+              </label>
+              <input
+                id="lastName"
+                type="text"
+                autoComplete="family-name"
+                required
+                value={lastName}
+                onChange={(e) => setLastName(e.target.value)}
+                placeholder="Doe"
                 className="w-full px-4 py-2.5 rounded-xl border border-stone-200 focus:border-amber-400 focus:ring-2 focus:ring-amber-100 outline-none transition text-stone-800 text-sm"
               />
             </div>
@@ -145,6 +220,55 @@ export function SignUpPage() {
                 value={confirm}
                 onChange={(e) => setConfirm(e.target.value)}
                 placeholder="••••••••"
+                className="w-full px-4 py-2.5 rounded-xl border border-stone-200 focus:border-amber-400 focus:ring-2 focus:ring-amber-100 outline-none transition text-stone-800 text-sm"
+              />
+            </div>
+
+            {/* Telephone */}
+            <div>
+              <label htmlFor="telephone" className="block text-sm font-medium text-stone-700 mb-1.5">
+                Telephone
+              </label>
+              <input
+                id="telephone"
+                type="tel"
+                autoComplete="tel"
+                required
+                value={telephone}
+                onChange={(e) => setTelephone(e.target.value)}
+                placeholder="0812345678"
+                className="w-full px-4 py-2.5 rounded-xl border border-stone-200 focus:border-amber-400 focus:ring-2 focus:ring-amber-100 outline-none transition text-stone-800 text-sm"
+              />
+            </div>
+
+            {/* Address */}
+            <div>
+              <label htmlFor="address" className="block text-sm font-medium text-stone-700 mb-1.5">
+                Address
+              </label>
+              <input
+                id="address"
+                type="text"
+                autoComplete="street-address"
+                required
+                value={address}
+                onChange={(e) => setAddress(e.target.value)}
+                placeholder="123 Main St, Bangkok"
+                className="w-full px-4 py-2.5 rounded-xl border border-stone-200 focus:border-amber-400 focus:ring-2 focus:ring-amber-100 outline-none transition text-stone-800 text-sm"
+              />
+            </div>
+
+            {/* Birth Date */}
+            <div>
+              <label htmlFor="birthDate" className="block text-sm font-medium text-stone-700 mb-1.5">
+                Birth date
+              </label>
+              <input
+                id="birthDate"
+                type="date"
+                required
+                value={birthDate}
+                onChange={(e) => setBirthDate(e.target.value)}
                 className="w-full px-4 py-2.5 rounded-xl border border-stone-200 focus:border-amber-400 focus:ring-2 focus:ring-amber-100 outline-none transition text-stone-800 text-sm"
               />
             </div>
