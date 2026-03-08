@@ -1,6 +1,7 @@
 package com.thaiglocal.webclient.dto.response;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 public record ActivityResponse(
     Long activityId,
@@ -10,5 +11,6 @@ public record ActivityResponse(
     LocalDateTime endDate,
     LocalDateTime dateCanRegister,
     Double price,
-    Integer registerCapacity
+    Integer registerCapacity,
+    List<ActivityRegisterResponse> registerInfo
 ) {}

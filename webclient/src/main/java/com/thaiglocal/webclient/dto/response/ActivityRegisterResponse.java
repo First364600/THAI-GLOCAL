@@ -4,8 +4,8 @@ import com.thaiglocal.webclient.dto.enums.ActivityRegisterStatus;
 
 public record ActivityRegisterResponse(
     Long activityRegisterId,
+    String username,
     Integer numberOfRegister,
     ActivityRegisterStatus status,
-    Long userId,
-    Long activityId
+    Double totalPrice
 ) {}
