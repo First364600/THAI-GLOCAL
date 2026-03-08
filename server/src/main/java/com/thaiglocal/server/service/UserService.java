@@ -6,8 +6,11 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
+import org.hibernate.jdbc.Expectation.RowCount;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.util.Pair;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -17,7 +20,9 @@ import com.thaiglocal.server.dto.request.UserRequest;
 import com.thaiglocal.server.dto.response.SignInResponse;
 import com.thaiglocal.server.dto.response.UserResponse;
 import com.thaiglocal.server.model.User;
+import com.thaiglocal.server.model.enums.RoleName;
 import com.thaiglocal.server.repository.UserRepository;
+import com.thaiglocal.server.security.CustomUserDetails;
 import com.thaiglocal.server.security.JwtUtils;
 
 @Service
@@ -47,16 +52,13 @@ public class UserService {
         String refreshToken = jwtUtils.generateRefreshToken(user.getUserId());
 
         return new SignInResponse(
-            user.getUsername(),
-            user.getEmail(),
-            role,
-            "Bearer",
+            mapToUserResponse(user),
             accessToken,
             refreshToken
         );
     }
 
-    public String singUp(SignUpRequest request) {
+    public String signUp(SignUpRequest request) {
         if (userRepository.existsByUsername(request.getUsername())) {
             throw new RuntimeException("Username is already taken.");
         }
@@ -85,6 +87,8 @@ public class UserService {
         User existingUser = userRepository.findById(userId)
             .orElseThrow(() -> new RuntimeException("Invalid user Id."));
         
+            // การกรองว่า admin ปกติ ไม่สามารถแก้ไขข้อมูลของ system admin ได้
+            // ผู้ใช้แก้ไขข้อมูลของ admin ไม่ได้            
         if (request.username() != null && !request.username().isBlank()) {
             existingUser.setUsername(request.username());
         }
@@ -110,6 +114,22 @@ public class UserService {
             existingUser.setIsActive(request.isActive());
         }
 
+        userRepository.save(existingUser);
+
+        return mapToUserResponse(existingUser);
+    }
+
+    public UserResponse grantAdminRole(Long userId, RoleName privilage) {
+        User existingUser = userRepository.findById(userId)
+            .orElseThrow(() -> new RuntimeException("Invalid user Id."));
+
+        if (existingUser.getRole().equals(RoleName.SYSTEM_ADMIN)) {
+            throw new RuntimeException("System Admin cannot changed role.");
+        }
+        
+        existingUser.setRole(privilage);
+
+        userRepository.save(existingUser);
         return mapToUserResponse(existingUser);
     }
 
@@ -130,6 +150,7 @@ public class UserService {
 
     private UserResponse mapToUserResponse(User user) {
         return new UserResponse(
+            user.getUserId(),
             user.getUsername(),
             user.getEmail(),
             user.getFirstName(),

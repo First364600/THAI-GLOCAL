@@ -9,6 +9,7 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
 import com.thaiglocal.server.model.User;
+import com.thaiglocal.server.model.enums.RoleName;
 
 public class CustomUserDetails implements UserDetails {
     private final User user;

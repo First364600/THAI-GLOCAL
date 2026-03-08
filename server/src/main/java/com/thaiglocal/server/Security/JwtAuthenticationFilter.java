@@ -23,11 +23,6 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     private final CustomUserDetailsService customUserDetailsService;
 
     @Override
-    protected boolean shouldNotFilter(HttpServletRequest request) {
-        return "/api/signin".equals(request.getServletPath());
-    }
-
-    @Override
     protected void doFilterInternal(
         HttpServletRequest request, 
         HttpServletResponse response, 
@@ -35,12 +30,20 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     ) throws ServletException, IOException {
         String accessToken = null;
         String refreshToken = null;
+
+
+        // 1. อ่านจาก Authorization header
+        String authHeader = request.getHeader("Authorization");
+        if (authHeader != null && authHeader.startsWith("Bearer ")) {
+            accessToken = authHeader.substring(7);
+        }
+
+        // 2. อ่านจาก cookie
         Cookie[] cookies = request.getCookies();
         if (cookies != null) {
             for (Cookie cookie: cookies) {
-                System.out.println("cookie: " + cookie.getName());
                 if ("ACCESS_TOKEN".equals(cookie.getName())) {
-                    accessToken = cookie.getValue();
+                    accessToken = accessToken == null ? cookie.getValue() : accessToken;
                 } else if ("REFRESH_TOKEN".equals(cookie.getName())) {
                     refreshToken = cookie.getValue();
                 }
@@ -67,13 +70,15 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             response.addCookie(newAccessCookie);
 
             authenticateUser(newAccessToken, true, request);
+        } else {
+            System.out.println("[DEBUG] No valid token found, skipping authentication.");
         }
 
         filterChain.doFilter(request, response);
     }
 
     private void authenticateUser(String token, boolean isAccessToken, HttpServletRequest request) {
-        Long userId = jwtUtils.extrackUserId(token, isAccessToken);
+        Long userId = jwtUtils.extractUserId(token, isAccessToken);
 
         if (userId != null && SecurityContextHolder.getContext().getAuthentication() == null) {
             UserDetails userDetails = customUserDetailsService.loadUserByUserId(userId);

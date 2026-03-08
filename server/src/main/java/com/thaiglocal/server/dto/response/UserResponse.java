@@ -6,7 +6,7 @@ import java.util.Date;
 import com.thaiglocal.server.model.enums.RoleName;;
 
 public record UserResponse(
-    // Long userId,
+    Long userId,
     String username,
     String email,
     String firstName,
