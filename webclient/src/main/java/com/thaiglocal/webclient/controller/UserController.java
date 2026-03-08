@@ -2,6 +2,7 @@ package com.thaiglocal.webclient.controller;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
 import com.thaiglocal.webclient.dto.request.*;
@@ -13,7 +14,7 @@ import lombok.AllArgsConstructor;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
-@RestController
+@Controller
 @RequestMapping("/api")
 @AllArgsConstructor
 public class UserController {
@@ -22,8 +23,9 @@ public class UserController {
     private final UserService userService;
 
     @PostMapping("/signin")
-    public Mono<ResponseEntity<SignInResponse>> signIn(@Valid @RequestBody SignInRequest request) {
+    public Mono<ResponseEntity<UserResponse>> signIn(@Valid @RequestBody SignInRequest request) {
         return userService.signIn(request)
+            .map(s -> s.getUserResponse())
             .map(ResponseEntity::ok);
     }
 
@@ -69,6 +71,12 @@ public class UserController {
         @PathVariable("id") Long id,
         @Valid @RequestBody RoleRequest request) {
         return userService.grantAdminRole(id, request)
+            .map(ResponseEntity::ok);
+    }
+
+    @PostMapping("/forget-password")
+    public Mono<ResponseEntity<String>> forgetPassword(@Valid @RequestBody ForgetPasswordRequest request) {
+        return userService.forgetPassword(request)
             .map(ResponseEntity::ok);
     }
 }
