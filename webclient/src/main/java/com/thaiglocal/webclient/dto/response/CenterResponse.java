@@ -21,5 +21,6 @@ public record CenterResponse(
                 String leaderLastName,
                 String leaderTelephone,
                 List<String> centerImages,
-                List<String> telephones) {
+                List<String> telephones,
+                List<StaffResponse> staffResponses) {
 }

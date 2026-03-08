@@ -87,10 +87,10 @@ public class CenterService {
                                 .bodyToMono(CenterResponse.class);
         }
 
-        public Mono<Void> createCenter(CenterRequest request, String cookieHeader) {
+        public Mono<Void> createCenter(Long userId, CenterRequest request, String cookieHeader) {
                 return centerWebClient
                                 .post()
-                                .uri("/api/centers/create")
+                                .uri("/api/centers/create/user/{userId}", userId)
                                 .headers(h -> addCookie(h, cookieHeader))
                                 .bodyValue(request)
                                 .retrieve()
@@ -100,6 +100,36 @@ public class CenterService {
                                 .onStatus(HttpStatusCode::is5xxServerError,
                                                 cr -> Mono.error(new RuntimeException(
                                                                 "Server error during createCenter")))
+                                .bodyToMono(Void.class);
+        }
+
+        public Mono<Void> addCenterAdmin(Long centerId, Long userId, String cookieHeader) {
+                return centerWebClient
+                                .post()
+                                .uri("/api/centers/{centerId}/add-admin/{userId}", centerId, userId)
+                                .headers(h -> addCookie(h, cookieHeader))
+                                .retrieve()
+                                .onStatus(HttpStatusCode::is4xxClientError,
+                                                cr -> Mono.error(new RuntimeException(
+                                                                "Client error during addCenterAdmin")))
+                                .onStatus(HttpStatusCode::is5xxServerError,
+                                                cr -> Mono.error(new RuntimeException(
+                                                                "Server error during addCenterAdmin")))
+                                .bodyToMono(Void.class);
+        }
+
+        public Mono<Void> addCenterStaff(Long centerId, Long userId, String cookieHeader) {
+                return centerWebClient
+                                .post()
+                                .uri("/api/centers/{centerId}/add-staff/{userId}", centerId, userId)
+                                .headers(h -> addCookie(h, cookieHeader))
+                                .retrieve()
+                                .onStatus(HttpStatusCode::is4xxClientError,
+                                                cr -> Mono.error(new RuntimeException(
+                                                                "Client error during addCenterStaff")))
+                                .onStatus(HttpStatusCode::is5xxServerError,
+                                                cr -> Mono.error(new RuntimeException(
+                                                                "Server error during addCenterStaff")))
                                 .bodyToMono(Void.class);
         }
 

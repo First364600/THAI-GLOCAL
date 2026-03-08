@@ -53,11 +53,25 @@ public class CenterController {
         return centerService.getCenterById(centerId, cookieHeader);
     }
 
-    @PostMapping("/create")
-    public Mono<ResponseEntity<Void>> createCenter(@RequestBody CenterRequest request,
+    @PostMapping("/create/user/{userId}")
+    public Mono<ResponseEntity<Void>> createCenter(@PathVariable Long userId, @RequestBody CenterRequest request,
             @RequestHeader(value = "Cookie", required = false) String cookieHeader) {
-        return centerService.createCenter(request, cookieHeader)
+        return centerService.createCenter(userId, request, cookieHeader)
                 .thenReturn(ResponseEntity.status(HttpStatus.CREATED).build());
+    }
+
+    @PostMapping("/{centerId}/add-admin/{userId}")
+    public Mono<ResponseEntity<Void>> addCenterAdmin(@PathVariable Long centerId, @PathVariable Long userId,
+            @RequestHeader(value = "Cookie", required = false) String cookieHeader) {
+        return centerService.addCenterAdmin(centerId, userId, cookieHeader)
+                .thenReturn(ResponseEntity.ok().build());
+    }
+
+    @PostMapping("/{centerId}/add-staff/{userId}")
+    public Mono<ResponseEntity<Void>> addCenterStaff(@PathVariable Long centerId, @PathVariable Long userId,
+            @RequestHeader(value = "Cookie", required = false) String cookieHeader) {
+        return centerService.addCenterStaff(centerId, userId, cookieHeader)
+                .thenReturn(ResponseEntity.ok().build());
     }
 
     @PatchMapping("/update/{centerId}")
