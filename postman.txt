@@ -1,0 +1,149 @@
+THAI-GLOCAL Postman (Client Proxy)
+
+Last updated: 2026-03-08
+Base URL (client): http://localhost:8082
+Proxy target (server): http://localhost:8081
+
+Recommended Variables
+- {{base_client}} = http://localhost:8082
+- {{centerId}} = 1
+- {{workshopId}} = 1
+- {{activityId}} = 1
+- {{registerId}} = 1
+- {{userId}} = 1
+
+Recommended Header
+- Cookie: JSESSIONID=<your-session-id>
+
+=================================
+CENTER
+=================================
+GET    {{base_client}}/client/centers
+GET    {{base_client}}/client/centers/{{centerId}}
+GET    {{base_client}}/client/centers/search?name=test
+GET    {{base_client}}/client/centers/admin/{{userId}}
+POST   {{base_client}}/client/centers/create/user/{{userId}}
+POST   {{base_client}}/client/centers/{{centerId}}/add-admin/{{userId}}
+POST   {{base_client}}/client/centers/{{centerId}}/add-staff/{{userId}}
+PATCH  {{base_client}}/client/centers/update/{{centerId}}
+DELETE {{base_client}}/client/centers/delete/{{centerId}}
+
+No body required
+- POST /client/centers/{{centerId}}/add-admin/{{userId}}
+- POST /client/centers/{{centerId}}/add-staff/{{userId}}
+- DELETE /client/centers/delete/{{centerId}}
+
+Create/Update Body (JSON)
+{
+  "centerName": "Demo Center",
+  "description": "Community center",
+  "address": "123 Main Rd",
+  "subDistrict": "Sub",
+  "district": "District",
+  "province": "Province",
+  "googleMapLink": "https://maps.google.com",
+  "email": "center@example.com",
+  "line": "@center",
+  "facebook": "centerfb",
+  "webSite": "https://center.example.com",
+  "createdAt": "2026-03-08T10:00:00",
+  "leaderFirstName": "Somchai",
+  "leaderLastName": "Jaidee",
+  "leaderTelephone": "0812345678",
+  "centerImages": ["https://img.example.com/c1.jpg"],
+  "telephones": ["0812345678", "0823456789"]
+}
+
+=================================
+WORKSHOP
+=================================
+GET    {{base_client}}/client/workshops
+GET    {{base_client}}/client/workshops/{{workshopId}}
+GET    {{base_client}}/client/workshops/search?name=test
+GET    {{base_client}}/client/workshops/type/CRAFT
+GET    {{base_client}}/client/workshops/center/{{centerId}}
+GET    {{base_client}}/client/workshops/center/{{centerId}}/type/CRAFT
+POST   {{base_client}}/client/workshops/create
+PATCH  {{base_client}}/client/workshops/update/{{workshopId}}
+DELETE {{base_client}}/client/workshops/delete/{{workshopId}}
+
+Create Body (JSON)
+{
+  "workshopName": "Craft Workshop",
+  "description": "Learn craft",
+  "price": 299.0,
+  "memberCapacity": 30,
+  "workshopType": "CRAFT",
+  "centerId": 1,
+  "workshopImages": ["https://img.example.com/w1.jpg"],
+  "activities": []
+}
+
+Update Body (JSON)
+{
+  "workshopName": "Craft Workshop Updated",
+  "description": "Updated",
+  "price": 350.0,
+  "memberCapacity": 40,
+  "workshopType": "CRAFT",
+  "centerId": 1,
+  "workshopImages": ["https://img.example.com/w1.jpg"]
+}
+
+=================================
+ACTIVITY
+=================================
+GET    {{base_client}}/client/activities
+GET    {{base_client}}/client/activities/{{activityId}}
+GET    {{base_client}}/client/activities/workshop/{{workshopId}}
+POST   {{base_client}}/client/activities/workshop/{{workshopId}}/create
+PATCH  {{base_client}}/client/activities/update/{{activityId}}
+DELETE {{base_client}}/client/activities/delete/{{activityId}}
+
+Body (JSON)
+{
+  "activityName": "Natural Dye Session",
+  "description": "Intro to natural dye",
+  "startDate": "2026-05-15T09:00:00",
+  "endDate": "2026-05-15T12:00:00",
+  "dateCanRegister": "2026-04-01T00:00:00",
+  "price": 199.0,
+  "registerCapacity": 30
+}
+
+=================================
+ACTIVITY REGISTER
+=================================
+GET    {{base_client}}/client/activity-registers
+GET    {{base_client}}/client/activity-registers/{{registerId}}
+GET    {{base_client}}/client/activity-registers/activity/{{activityId}}
+GET    {{base_client}}/client/activity-registers/user/{{userId}}
+POST   {{base_client}}/client/activity-registers/create/activity/{{activityId}}/user/{{userId}}
+PATCH  {{base_client}}/client/activity-registers/{{registerId}}/confirm
+PATCH  {{base_client}}/client/activity-registers/{{registerId}}/cancel
+PATCH  {{base_client}}/client/activity-registers/{{registerId}}/complete
+DELETE {{base_client}}/client/activity-registers/delete/{{registerId}}
+
+Create Body (JSON)
+{
+  "numberOfRegister": 2
+}
+
+No body required
+- PATCH /client/activity-registers/{{registerId}}/confirm
+- PATCH /client/activity-registers/{{registerId}}/cancel
+- PATCH /client/activity-registers/{{registerId}}/complete
+- DELETE /client/activity-registers/delete/{{registerId}}
+
+=================================
+FILES
+=================================
+POST   {{base_client}}/client/files/upload
+- Body: form-data
+- key: file (type File)
+
+DELETE {{base_client}}/client/files/delete
+- Content-Type: application/json
+{
+  "imageUrl": "https://res.cloudinary.com/demo/image/upload/sample.jpg"
+}

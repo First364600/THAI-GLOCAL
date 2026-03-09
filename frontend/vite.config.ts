@@ -1,6 +1,6 @@
 /// <reference types="vitest" />
 
-import legacy from '@vitejs/plugin-legacy'
+import tailwindcss from '@tailwindcss/vite'
 import react from '@vitejs/plugin-react'
 import { defineConfig } from 'vite'
 
@@ -8,8 +8,27 @@ import { defineConfig } from 'vite'
 export default defineConfig({
   plugins: [
     react(),
-    legacy()
+    tailwindcss(),
   ],
+  server: {
+    proxy: {
+      '/api/files': {
+        target: 'http://localhost:8081',
+        changeOrigin: true,
+        secure: false,
+      },
+      '/api': {
+        target: 'http://localhost:8081',
+        changeOrigin: true,
+        secure: false,
+      },
+      '/client': {
+        target: 'http://localhost:8082',
+        changeOrigin: true,
+        secure: false,
+      },
+    },
+  },
   test: {
     globals: true,
     environment: 'jsdom',
