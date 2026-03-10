@@ -15,7 +15,7 @@ public class WebClientConfig {
     @Bean
     public WebClient webClient() {
         return WebClient.builder()
-            .baseUrl("http://localhost:8081/api")
+            .baseUrl("http://localhost:8081")
             .defaultHeader("Content-Type", "application/json")
             .filter((request, next) -> {
                 // ดึง Cookie จาก Incoming Request แล้วส่งต่อไปยัง Server

@@ -60,9 +60,9 @@ const useMyCenterStore = create<MyCenterState>()(
           // Map server field names to frontend form field names
           const mapped = raw.map((c: any) => ({
             id: String(c.centerId),
-            name: c.centerName,
+            centerName: c.centerName,
             description: c.description,
-            address: c.address,
+            address: c.address || `${c.subDistrict}, ${c.district}, ${c.province}`,
             subDistrict: c.subDistrict,
             district: c.district,
             province: c.province,

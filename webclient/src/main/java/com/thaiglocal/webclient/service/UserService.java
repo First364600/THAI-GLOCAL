@@ -3,6 +3,7 @@ package com.thaiglocal.webclient.service;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.stereotype.Service;
+import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.reactive.function.client.WebClient;
 
 import com.thaiglocal.webclient.dto.request.ForgetPasswordRequest;
@@ -25,7 +26,7 @@ public class UserService {
     
     public Mono<SignInResponse> signIn(SignInRequest sinInRequest) {
         return webClient.post()
-            .uri("/signin")
+            .uri("/api/signin")
             .body(Mono.just(sinInRequest), SignInRequest.class)
             .retrieve()
             .onStatus(HttpStatusCode::is4xxClientError, clientResponse ->
@@ -42,7 +43,7 @@ public class UserService {
 
     public Mono<UserResponse> signUp(SignUpRequest signUpRequest) {
         return webClient.post()
-            .uri("/signup")
+            .uri("/api/signup")
             .header("Content-Type", "application/json")
             .body(Mono.just(signUpRequest), SignUpRequest.class)
             .retrieve()
@@ -51,7 +52,7 @@ public class UserService {
 
     public Mono<String> signOut() {
         return webClient.post()
-            .uri("/signout")
+            .uri("/apli/signout")
             .retrieve()
             .bodyToMono(String.class);
 
@@ -59,7 +60,7 @@ public class UserService {
 
     public Mono<UserResponse> getMyProfile() {
         return webClient.get()
-            .uri("/users/me")
+            .uri("/api/users/me")
             .header("Content-Type", "application/json")
             .retrieve()
             .bodyToMono(UserResponse.class);
@@ -67,7 +68,7 @@ public class UserService {
 
     public Mono<UserResponse> updateUser(UserRequest userRequest) {
         return webClient.patch()
-            .uri("/users/me")
+            .uri("/api/users/me")
             .header("Content-Type", "application/json")
             .body(Mono.just(userRequest), UserRequest.class)
             .retrieve()
@@ -76,7 +77,7 @@ public class UserService {
 
     public Flux<UserResponse> getAllUsers() {
         return webClient.get()
-            .uri("/admin/users")
+            .uri("/api/admin/users")
             .header("Content-Type", "application/json")
             .retrieve()
             .bodyToFlux(UserResponse.class);
@@ -84,7 +85,7 @@ public class UserService {
 
     public Mono<UserResponse> adminUpdateUserByUserId(Long targetUserId, UserRequest request) {
         return webClient.patch()
-            .uri("/admin/users/" + targetUserId)
+            .uri("/api/admin/users/" + targetUserId)
             .header("Content-Type", "application/json")
             .body(Mono.just(request), UserRequest.class)
             .retrieve()
@@ -93,7 +94,7 @@ public class UserService {
 
     public Mono<UserResponse> grantAdminRole(Long targetUserId, RoleRequest roleRequest) {
         return webClient.patch()
-            .uri("/admin/users/role/" + targetUserId)
+            .uri("/api/admin/users/role/" + targetUserId)
             .header("Content-Type", "application/json")
             .body(Mono.just(roleRequest), RoleRequest.class)
             .retrieve()
@@ -102,7 +103,7 @@ public class UserService {
 
     public Mono<String> forgetPassword(ForgetPasswordRequest request) {
         return webClient.post()
-            .uri("/forget-password")
+            .uri("/api/forget-password")
             .header("Content-Type", "application/json")
             .body(Mono.just(request), ForgetPasswordRequest.class)
             .retrieve()
@@ -111,7 +112,7 @@ public class UserService {
 
     public Mono<Void> deleteUser(Long targetUserId) {
         return webClient.delete()
-            .uri("/admin/users/" + targetUserId)
+            .uri("/api/admin/users/" + targetUserId)
             .retrieve()
             .bodyToMono(Void.class);
     }

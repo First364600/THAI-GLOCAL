@@ -33,7 +33,7 @@ const useAuthStore = create<AuthState>()(
         try {
           // POST directly to server so JWT Set-Cookie headers reach the browser
           const loginData = { usernameOrEmail: userData.email, password: userData.password };
-          const response: any = await apiClient.post("/api/signin", loginData);
+          const response: any = await apiClient.post("/client/users/signin", loginData);
           // Server returns { userResponse: {...}, accessToken, refreshToken }
           const userResponse = response?.userResponse ?? response;
           set({
@@ -54,7 +54,7 @@ const useAuthStore = create<AuthState>()(
               telephone: userData.telephone || "",
               address: userData.address || "",
             };
-            const response = await apiClient.post("/api/signup", signupData);
+            const response = await apiClient.post("/client/users/signup", signupData);
             // Do not immediately authenticate after signup so the user is redirected to login
          } catch(e: any) {
             let errorMsg = "Registration failed. Please try again later.";
@@ -82,7 +82,7 @@ const useAuthStore = create<AuthState>()(
       },
       logout: async () => {
         try {
-          await apiClient.post("/api/signout");
+          await apiClient.post("/client/users/signout");
         } catch (e) {
           console.error("Signout request failed", e);
         } finally {

@@ -215,7 +215,7 @@ function CenterForm({ initial, onSave, onCancel }: {
                   files.slice(0, 3 - form.images.length).map(async (file) => {
                     const formData = new FormData();
                     formData.append("file", file);
-                    const res = await apiClient.post("/api/files/upload", formData, {
+                    const res = await apiClient.post("/client/files/upload", formData, {
                       headers: { "Content-Type": "multipart/form-data" },
                     }) as any;
                     return res.imageUrl as string;

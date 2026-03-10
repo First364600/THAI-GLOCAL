@@ -39,7 +39,7 @@ public class UserSecurityConfig {
                 .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
             )
             .authorizeHttpRequests(auth -> auth
-                .requestMatchers("/api/signin", "/api/signup").permitAll()
+                .requestMatchers("/api/signin", "/api/signup", "/error").permitAll()
                 .requestMatchers("/api/admin/users/role/**").hasRole("SYSTEM_ADMIN")
                 .requestMatchers("/api/admin/**").hasAnyRole("SYSTEM_ADMIN", "SUPER_ADMIN")
                 .anyRequest().authenticated()

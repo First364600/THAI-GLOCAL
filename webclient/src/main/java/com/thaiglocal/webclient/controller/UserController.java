@@ -23,9 +23,9 @@ public class UserController {
     private final UserService userService;
 
     @PostMapping("/signin")
-    public Mono<ResponseEntity<UserResponse>> signIn(@Valid @RequestBody SignInRequest request) {
+    public Mono<ResponseEntity<SignInResponse>> signIn(@Valid @RequestBody SignInRequest request) {
         return userService.signIn(request)
-            .map(s -> s.getUserResponse())
+            // .map(s -> s.getUserResponse())
             .map(ResponseEntity::ok);
     }
 
