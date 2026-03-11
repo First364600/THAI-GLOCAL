@@ -7,7 +7,10 @@ import java.util.List;
 import org.hibernate.annotations.CreationTimestamp;
 
 import jakarta.persistence.CascadeType;
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -18,6 +21,7 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import com.thaiglocal.server.model.enums.CenterStatus;
 
 @Entity
 @Table(name = "centers")
@@ -49,6 +53,11 @@ public class Center {
     private String leaderLastName;
     private String leaderTelephone;
 
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    @Builder.Default
+    private CenterStatus status = CenterStatus.PENDING;
+
     // relationship
     // one center can have many telephones
     @Builder.Default
@@ -69,8 +78,6 @@ public class Center {
     @Builder.Default
     @OneToMany(mappedBy = "center", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<CenterImage> centerImages = new ArrayList<>();
-
-
 
     // helper method
     // for bi-directional relationship management (Center <-> CenterBelongUser)

@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Link, Navigate } from "react-router";
+import { Link, Navigate, useNavigate } from "react-router";
 import {
   Calendar,
   MapPin,
@@ -48,6 +48,7 @@ export function MyBookingsPage() {
   const { workshops, centers, fetchData } = useDataStore();
   const [tab, setTab] = useState<"upcoming" | "all">("upcoming");
   const [cancelId, setCancelId] = useState<string | null>(null);
+  const navigate = useNavigate();
 
   if (!user) return <Navigate to="/login" state={{ from: "/my-bookings" }} replace />;
 
@@ -78,6 +79,7 @@ export function MyBookingsPage() {
 
       return {
         id: b.id,
+        activityId: activityId,
         activityName: b.activityName || workshop?.title || "Unknown Activity",
         images: workshop?.images ?? [],
         duration: workshop?.duration ?? "",
@@ -156,9 +158,10 @@ export function MyBookingsPage() {
             {displayed.map((booking) => (
               <div
                 key={booking.id}
-                className={`bg-white rounded-2xl border overflow-hidden transition-all ${
+                className={`bg-white rounded-2xl border overflow-hidden transition-all cursor-pointer hover:shadow-lg ${
                   booking.status === "cancelled" ? "opacity-60 border-stone-100" : "border-stone-100 hover:shadow-md"
                 }`}
+                onClick={() => navigate(`/workshops/${booking.activityId}`)}
               >
                 <div className="flex">
                   {/* Image */}
@@ -233,7 +236,7 @@ export function MyBookingsPage() {
                         ฿{booking.totalPrice.toLocaleString()}
                       </span>
                       {booking.status !== "cancelled" && booking.status !== "completed" && (
-                        <div className="flex items-center gap-2">
+                        <div className="flex items-center gap-2" onClick={(e) => e.stopPropagation()}>
                           {!booking.canCancel && (
                             <span className="text-xs text-red-500 mr-2">Too late to cancel</span>
                           )}

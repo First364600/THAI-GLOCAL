@@ -17,6 +17,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.thaiglocal.server.dto.request.CenterRequest;
 import com.thaiglocal.server.dto.response.CenterResponse;
 import com.thaiglocal.server.service.CenterService;
+import com.thaiglocal.server.model.enums.CenterStatus;
 
 import jakarta.validation.Valid;
 
@@ -95,5 +96,21 @@ public class CenterController {
     public ResponseEntity<Void> deleteCenter(@PathVariable Long centerId) {
         centerService.deleteCenter(centerId);
         return ResponseEntity.noContent().build(); // HTTP 204 No Content
+    }
+
+    // Method: GET /api/centers/admin/pending
+    @GetMapping("/admin/pending")
+    public ResponseEntity<List<CenterResponse>> getPendingCenters() {
+        List<CenterResponse> responses = centerService.getPendingCenters();
+        return ResponseEntity.ok(responses);
+    }
+
+    // Method: PATCH /api/centers/{centerId}/status
+    @PatchMapping("/{centerId}/status")
+    public ResponseEntity<Void> updateCenterStatus(
+            @PathVariable Long centerId,
+            @RequestParam CenterStatus status) {
+        centerService.updateCenterStatus(centerId, status);
+        return ResponseEntity.ok().build();
     }
 }

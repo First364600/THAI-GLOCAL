@@ -485,7 +485,7 @@ function WorkshopForm({ initial, onSave, onCancel }: {
                   files.slice(0, 3 - form.images.length).map(async (file) => {
                     const formData = new FormData();
                     formData.append("file", file);
-                    const res = await apiClient.post("/api/files/upload", formData, {
+                    const res = await apiClient.post("/client/files/upload", formData, {
                       headers: { "Content-Type": "multipart/form-data" },
                     }) as any;
                     return res.imageUrl as string;
@@ -656,6 +656,15 @@ export function MyCenterPage() {
       });
       setEditingWorkshop(null);
     } else {
+      // Generate activities from recurring schedule
+      const activities = generateActivitiesFromSchedule(
+        data.recurringDays,
+        data.sessionRounds,
+        data.defaultRegistrationCapacity,
+        data.price,
+        data.title
+      );
+
       await store.createWorkshop(activeCenter.id, {
         workshopName: data.title,
         description: data.description,
@@ -663,6 +672,7 @@ export function MyCenterPage() {
         memberCapacity: data.maxParticipants,
         workshopType: data.category,
         workshopImages: data.images,
+        activities: activities,
       });
     }
     await store.fetchMyCenterData(String(user!.id));
@@ -1001,4 +1011,69 @@ export function MyCenterPage() {
       )}
     </div>
   );
+}
+
+// Helper function - เพิ่มที่ด้านบนของ file
+function generateActivitiesFromSchedule(
+  recurringDays: string[],
+  sessionRounds: Array<{ start: string; end: string }>,
+  capacity: number,
+  price: number,
+  workshopTitle: string
+): Array<{
+  activityName: string;
+  startDate: string;
+  endDate: string;
+  description: string;
+  dateCanRegister: string;
+  price: number;
+  registerCapacity: number;
+}> {
+  const activities: any[] = [];
+  const dayMap: Record<string, number> = {
+    Sun: 0, Mon: 1, Tue: 2, Wed: 3, Thu: 4, Fri: 5, Sat: 6
+  };
+
+  // Get upcoming Sunday as start date
+  const today = new Date();
+  const daysUntilSunday = (7 - today.getDay()) % 7 || 7;
+  const nextSunday = new Date(today);
+  nextSunday.setDate(today.getDate() + daysUntilSunday);
+  nextSunday.setHours(0, 0, 0, 0);
+
+  // Generate activities for 4 weeks
+  for (let week = 0; week < 4; week++) {
+    recurringDays.forEach((day) => {
+      const dayIndex = dayMap[day];
+      const activityDate = new Date(nextSunday);
+      activityDate.setDate(nextSunday.getDate() + week * 7 + dayIndex);
+
+      sessionRounds.forEach((round, roundIdx) => {
+        const [startH, startM] = round.start.split(":").map(Number);
+        const [endH, endM] = round.end.split(":").map(Number);
+
+        const startDateTime = new Date(activityDate);
+        startDateTime.setHours(startH, startM, 0, 0);
+
+        const endDateTime = new Date(activityDate);
+        endDateTime.setHours(endH, endM, 0, 0);
+
+        const registerDate = new Date(activityDate);
+        registerDate.setDate(registerDate.getDate() - 1); // Can register 1 day before
+        registerDate.setHours(0, 0, 0, 0);
+
+        activities.push({
+          activityName: `${workshopTitle}`,
+          startDate: startDateTime.toISOString(),
+          endDate: endDateTime.toISOString(),
+          description: `${workshopTitle}`,
+          dateCanRegister: registerDate.toISOString(),
+          price,
+          registerCapacity: capacity,
+        });
+      });
+    });
+  }
+
+  return activities;
 }

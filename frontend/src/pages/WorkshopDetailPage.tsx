@@ -41,12 +41,15 @@ function BookingModal({
   const createBooking = useBookingStore((s) => s.createBooking);
   const user = useAuthStore((s) => s.user);
   const [form, setForm] = useState({
-    name: "",
-    email: "",
-    phone: "",
+    name: user?.firstName && user?.lastName 
+      ? `${user.firstName} ${user.lastName}` 
+      : user?.username || "",
+    email: user?.email || "",
+    phone: user?.telephone || "",
     participants: 1,
     notes: "",
   });
+  
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [loading, setLoading] = useState(false);
 

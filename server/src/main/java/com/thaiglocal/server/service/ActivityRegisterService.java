@@ -9,7 +9,9 @@ import com.thaiglocal.server.dto.request.ActivityRegisterRequest;
 import com.thaiglocal.server.dto.response.ActivityRegisterReponse;
 import com.thaiglocal.server.model.Activity;
 import com.thaiglocal.server.model.ActivityRegister;
+import com.thaiglocal.server.model.Center;
 import com.thaiglocal.server.model.User;
+import com.thaiglocal.server.model.Workshop;
 import com.thaiglocal.server.model.enums.ActivityRegisterStatus;
 import com.thaiglocal.server.repository.ActivityRegisterRepository;
 import com.thaiglocal.server.repository.ActivityRepository;
@@ -77,12 +79,30 @@ public class ActivityRegisterService {
 
     @Transactional
     public void createActivityRegister(ActivityRegisterRequest request, Long activityId, Long userId) {
-        // Implementation for creating activity register
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new RuntimeException("User not found with id: " + userId));
 
         Activity activity = activityRepository.findById(activityId)
                 .orElseThrow(() -> new RuntimeException("Activity not found with id: " + activityId));
+
+        //ตรวจสอบว่า user ไม่ใช่เจ้าของศูนย์
+        Workshop workshop = activity.getWorkshop();
+        if (workshop == null) {
+            throw new RuntimeException("Activity must belong to a workshop");
+        }
+
+        Center center = workshop.getCenter();
+        if (center == null) {
+            throw new RuntimeException("Workshop must belong to a center");
+        }
+
+        // ตรวจสอบผ่าน CenterBelongUser ว่า user เป็นเจ้าของศูนย์หรือไม่
+        boolean isCenterOwner = center.getCenterBelongUsers().stream()
+                .anyMatch(cbu -> cbu.getUser().getUserId().equals(userId));
+
+        if (isCenterOwner) {
+            throw new RuntimeException("Center owner cannot register for activities");
+        }
 
         int requestCount = request.getNumberOfRegister() != null ? request.getNumberOfRegister() : 0;
         int maxCapacity = activity.getRegisterCapacity() != null ? activity.getRegisterCapacity() : 0;
@@ -111,7 +131,6 @@ public class ActivityRegisterService {
 
     @Transactional
     public void confirmActivityRegister(Long activityRegisterId) {
-        // Implementation for confirming activity register
         ActivityRegister activityRegister = activityRegisterRepository.findById(activityRegisterId)
                 .orElseThrow(() -> new RuntimeException("Activity register not found with id: " + activityRegisterId));
 
@@ -121,7 +140,6 @@ public class ActivityRegisterService {
 
     @Transactional
     public void cancelActivityRegister(Long activityRegisterId) {
-        // Implementation for canceling activity register
         ActivityRegister activityRegister = activityRegisterRepository.findById(activityRegisterId)
                 .orElseThrow(() -> new RuntimeException("Activity register not found with id: " + activityRegisterId));
     
@@ -131,7 +149,6 @@ public class ActivityRegisterService {
 
     @Transactional
     public void completeActivityRegister(Long activityRegisterId) {
-        // Implementation for completing activity register
         ActivityRegister activityRegister = activityRegisterRepository.findById(activityRegisterId)
                 .orElseThrow(() -> new RuntimeException("Activity register not found with id: " + activityRegisterId));
 
@@ -141,7 +158,6 @@ public class ActivityRegisterService {
 
     @Transactional
     public void deleteActivityRegister(Long activityRegisterId) {
-        // Implementation for deleting activity register
         if (!activityRegisterRepository.existsById(activityRegisterId)) {
             throw new RuntimeException("Activity register not found with id: " + activityRegisterId);
         }

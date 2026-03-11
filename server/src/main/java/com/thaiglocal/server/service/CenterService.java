@@ -14,6 +14,7 @@ import com.thaiglocal.server.model.CenterBelongUser;
 import com.thaiglocal.server.model.CenterImage;
 import com.thaiglocal.server.model.Telephone;
 import com.thaiglocal.server.model.User;
+import com.thaiglocal.server.model.enums.CenterStatus;
 import com.thaiglocal.server.model.enums.PositionName;
 import com.thaiglocal.server.model.enums.RoleName;
 import com.thaiglocal.server.repository.CenterBelongUserRepository;
@@ -307,9 +308,22 @@ public class CenterService {
         centerRepository.save(center);
     }
 
+    @Transactional
+    public void updateCenterStatus(Long centerId, CenterStatus status) {
+        Center center = centerRepository.findById(centerId)
+                .orElseThrow(() -> new NotFoundException("Center not found with id: " + centerId));
+        center.setStatus(status);
+        centerRepository.save(center);
+    }
+
     public void deleteCenter(Long centerId) {
         Center center = centerRepository.findById(centerId)
                 .orElseThrow(() -> new NotFoundException("Center not found with id: " + centerId));
         centerRepository.delete(center);
+    }
+
+    public List<CenterResponse> getPendingCenters() {
+        List<Center> centers = centerRepository.findByStatus(CenterStatus.PENDING);
+        return mapToCenterResponseList(centers);
     }
 }

@@ -1,5 +1,4 @@
-﻿
-import { create } from "zustand";
+﻿import { create } from "zustand";
 import apiClient from "../api/axiosClient";
 
 export type CenterStatus = "active" | "suspended" | "disabled";
@@ -54,6 +53,7 @@ interface AdminState {
   adminCenters: AdminCenter[];
   centerStatuses: Record<string, CenterStatus>;
   registrationRequests: CenterRegistrationRequest[];
+  pendingCenters: AdminCenter[];
   systemStats: {
     totalUsers: number;
     activeCenters: number;
@@ -63,15 +63,12 @@ interface AdminState {
 
   fetchAdminData: () => Promise<void>;
   syncUsers: () => Promise<void>;
+  fetchPendingCenters: () => Promise<void>;
 
   updateUserStatus: (id: string, status: "active" | "inactive" | "suspended") => Promise<void>;
-  updateUserRole: (id: string, role: string) => Promise<void>;
+  updateCenterStatus: (id: string | number, status: string) => Promise<void>;
   updateUserInfo: (id: string, data: any) => Promise<void>;
   deleteUser: (id: string) => Promise<void>;
-
-  updateCenterStatus: (id: string, status: string) => Promise<void>;
-  updateAdminCenter: (id: string, data: any) => Promise<void>;
-  deleteCenter: (id: string) => Promise<void>;
 
   updateRegistrationRequestStatus: (id: number, status: "pending" | "approved" | "rejected") => Promise<void>;
 
@@ -84,6 +81,7 @@ const useAdminStore = create<AdminState>((set, get) => ({
   adminCenters: [],
   centerStatuses: {},
   registrationRequests: [],
+  pendingCenters: [],
   systemStats: {
     totalUsers: 0,
     activeCenters: 0,
@@ -95,15 +93,23 @@ const useAdminStore = create<AdminState>((set, get) => ({
 
   fetchAdminData: async () => {
     try {
-      const [usersRes, centersRes, requestsRes] = await Promise.allSettled([
+      const [usersRes, centersRes, requestsRes, pendingCentersRes] = await Promise.allSettled([
         apiClient.get(`/client/users/admin`),
         apiClient.get(`/client/centers`),
-        apiClient.get(`/client/admin/registration-requests`)
+        apiClient.get(`/client/admin/registration-requests`),
+        apiClient.get(`/client/centers/admin/pending`)
       ]);
 
-      const users = usersRes.status === "fulfilled" ? (Array.isArray(usersRes.value) ? usersRes.value : []) : [];
+      const users = usersRes.status === "fulfilled" 
+        ? (Array.isArray(usersRes.value) ? usersRes.value.map((u: any) => ({
+            id: u.id || u.userId || u._id, 
+            ...u
+          })) : []) 
+        : [];
+      
       const centers = centersRes.status === "fulfilled" ? (Array.isArray(centersRes.value) ? centersRes.value : []) : [];
       const requests = requestsRes.status === "fulfilled" ? (Array.isArray(requestsRes.value) ? requestsRes.value : []) : [];
+      const pendingCenters = pendingCentersRes.status === "fulfilled" ? (Array.isArray(pendingCentersRes.value) ? pendingCentersRes.value : []) : [];  
 
       const statuses: Record<string, CenterStatus> = {};
       centers.forEach((c: any) => { statuses[c.id] = c.centerStatus ?? "active"; });
@@ -114,18 +120,25 @@ const useAdminStore = create<AdminState>((set, get) => ({
         adminCenters: centers,
         centerStatuses: statuses,
         registrationRequests: requests,
+        pendingCenters: pendingCenters,  
         systemStats: {
           totalUsers: users.length,
           activeCenters: centers.filter((c: any) => c.status === "approved").length,
           revenue: Math.floor(Math.random() * 50000),
-          pendingApprovals: requests.filter((r: any) =>
-            r.status === "PENDING" || r.status === "pending"
-          ).length,
+          pendingApprovals: pendingCenters.length,  
         },
       });
     } catch (error) {
        console.error("Admin fetch error:", error);
     }
+  },
+
+  fetchPendingCenters: async () => {  
+    try {
+      const res = await apiClient.get(`/client/centers/admin/pending`);
+      const pendingCenters = Array.isArray(res) ? res : [];
+      set({ pendingCenters });
+    } catch(e) { console.error(e); }
   },
 
   updateUserStatus: async (id, status) => {
@@ -137,7 +150,7 @@ const useAdminStore = create<AdminState>((set, get) => ({
     } catch (e) { console.error(e); }
   },
 
-  updateUserRole: async (id, role) => {
+  updateUserRole: async (id: any, role: any) => {
     try {
       await apiClient.patch(`/client/users/admin/role/${id}`, { role });
       set((state) => ({
@@ -166,14 +179,24 @@ const useAdminStore = create<AdminState>((set, get) => ({
 
   updateCenterStatus: async (id, status) => {
     try {
-       await apiClient.patch(`/client/centers/update/${id}`, { status });
-       set((state) => ({
-        centers: state.centers.map((c) => (c.id === id ? { ...c, status: status as AdminCenter['status'] } : c)),
-       }));
-    } catch(e) { console.error(e); }
+      await apiClient.patch(`/client/centers/${id}/status?status=${status}`);
+      
+      // อัพเดท pendingCenters โดยลบ center ที่ approve/reject ไป
+      set((state) => ({
+        pendingCenters: state.pendingCenters.filter(
+          (c) => c.id !== id.toString()
+        ),
+        systemStats: {
+          ...state.systemStats,
+          pendingApprovals: Math.max(0, state.systemStats.pendingApprovals - 1),
+        },
+      }));
+    } catch (e) {
+      console.error("Update center status error:", e);
+    }
   },
 
-  updateAdminCenter: async (id, data) => {
+  updateAdminCenter: async (id: any, data: any) => {
     try {
       const payload: any = {};
       if (data.name !== undefined) payload.centerName = data.name;
@@ -196,7 +219,7 @@ const useAdminStore = create<AdminState>((set, get) => ({
     } catch (e) { console.error(e); }
   },
 
-  deleteCenter: async (id) => {
+  deleteCenter: async (id: any) => {
     try {
        await apiClient.delete(`/client/centers/delete/${id}`);
        set((state) => ({

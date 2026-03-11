@@ -10,6 +10,7 @@ export interface User {
   email: string;
   role: string;
   avatarId?: string;
+  telephone: string;
   [key: string]: any;
 }
 

@@ -88,8 +88,6 @@ public class UserService {
         User existingUser = userRepository.findById(userId)
             .orElseThrow(() -> new RuntimeException("Invalid user Id."));
         
-            // การกรองว่า admin ปกติ ไม่สามารถแก้ไขข้อมูลของ system admin ได้
-            // ผู้ใช้แก้ไขข้อมูลของ admin ไม่ได้            
         if (request.username() != null && !request.username().isBlank()) {
             existingUser.setUsername(request.username());
         }
@@ -179,14 +177,11 @@ public class UserService {
         User user = userRepository.findByEmail(email)
             .orElseThrow(() -> new RuntimeException("User not found with email: " + email));
         
-        // สุ่มรหัสใหม่
         String newPassword = generateRandomPassword();
         
-        // อัพเดตรหัสในฐานข้อมูล (เลยใช้ได้เลย ไม่ต้องรอ verify)
         user.setPassword(passwordEncoder.encode(newPassword));
         userRepository.save(user);
         
-        // ส่ง email พร้อมรหัสใหม่
         sendPasswordEmail(user.getEmail(), user.getUsername(), newPassword);
     }
     

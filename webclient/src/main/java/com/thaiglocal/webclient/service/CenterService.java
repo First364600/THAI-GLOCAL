@@ -128,6 +128,31 @@ public class CenterService {
                                 .bodyToMono(Void.class);
         }
 
+        public Flux<CenterResponse> getPendingCenters(String cookieHeader) {
+                return centerWebClient
+                                .get()
+                                .uri("/api/centers/admin/pending")
+                                .headers(h -> addCookie(h, cookieHeader))
+                                .retrieve()
+                                .onStatus(HttpStatusCode::is4xxClientError, cr -> clientError(cr, "getPendingCenters"))
+                                .onStatus(HttpStatusCode::is5xxServerError, cr -> serverError(cr, "getPendingCenters"))
+                                .bodyToFlux(CenterResponse.class);
+        }
+
+        public Mono<Void> updateCenterStatus(Long centerId, String status, String cookieHeader) {
+                return centerWebClient
+                                .patch()
+                                .uri(uriBuilder -> uriBuilder
+                                                .path("/api/centers/{centerId}/status")
+                                                .queryParam("status", status)
+                                                .build(centerId))
+                                .headers(h -> addCookie(h, cookieHeader))
+                                .retrieve()
+                                .onStatus(HttpStatusCode::is4xxClientError, cr -> clientError(cr, "updateCenterStatus"))
+                                .onStatus(HttpStatusCode::is5xxServerError, cr -> serverError(cr, "updateCenterStatus"))
+                                .bodyToMono(Void.class);
+        }
+
         private void addCookie(HttpHeaders headers, String cookieHeader) {
                 if (cookieHeader != null && !cookieHeader.isBlank()) {
                         headers.add("Cookie", cookieHeader);

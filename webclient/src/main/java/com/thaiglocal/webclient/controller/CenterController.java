@@ -87,4 +87,18 @@ public class CenterController {
         return centerService.deleteCenter(centerId, cookieHeader)
                 .thenReturn(ResponseEntity.noContent().build());
     }
+
+    @GetMapping("/admin/pending")
+    public Flux<CenterResponse> getPendingCenters(
+            @RequestHeader(value = "Cookie", required = false) String cookieHeader) {
+        return centerService.getPendingCenters(cookieHeader);
+    }
+
+    @PatchMapping("/{centerId}/status")
+    public Mono<ResponseEntity<Void>> updateCenterStatus(@PathVariable Long centerId,
+            @RequestParam String status,
+            @RequestHeader(value = "Cookie", required = false) String cookieHeader) {
+        return centerService.updateCenterStatus(centerId, status, cookieHeader)
+                .thenReturn(ResponseEntity.ok().build());
+    }
 }

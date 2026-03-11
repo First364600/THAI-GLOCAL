@@ -147,7 +147,7 @@ function SessionForm({ initial, onSave, onCancel }: {
             onChange={(e) => set("maxParticipants", Number(e.target.value))}
           />
         </div>
-        <div>
+        {/* <div>
           <label className={labelCls}>Status</label>
           <select
             className={inputCls}
@@ -159,7 +159,7 @@ function SessionForm({ initial, onSave, onCancel }: {
             <option value="completed">Completed</option>
             <option value="cancelled">Cancelled</option>
           </select>
-        </div>
+        </div> */}
       </div>
 
       <div>
@@ -372,13 +372,13 @@ export function WorkshopSessionsPage() {
           <div>
             <div className="flex items-center justify-between mb-4">
               <h2 className="text-xl font-bold text-stone-900 border-l-4 border-amber-500 pl-3">Booking Approval & Management</h2>
-              <button 
+              {/* <button 
                 onClick={() => alert("Test booking feature coming soon.")}
                 className="text-xs px-3 py-1.5 bg-amber-100 hover:bg-amber-200 text-amber-800 rounded-lg flex items-center gap-1 transition-colors font-medium shadow-sm"
                 title="Only for testing"
               >
                 <Plus className="w-4 h-4" /> Add Test Booking
-              </button>
+              </button> */}
             </div>
             
             {/* Quick Stats */}

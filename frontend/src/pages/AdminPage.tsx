@@ -110,12 +110,13 @@ export function AdminPage() {
 
 // ─── RequestsTab ─────────────────────────────────────────────────────────────
 function RequestsTab() {
-  const requests = useAdminStore((s) => s.registrationRequests);
+  const pendingCenters = useAdminStore((s) => s.pendingCenters);
+  const updateCenterStatus = useAdminStore((s) => s.updateCenterStatus);
   const { t } = useTranslation();
-  const [selectedReq, setSelectedReq] = useState<CenterRegistrationRequest | null>(null);
+  const [selectedReq, setSelectedReq] = useState<any | null>(null);
 
   if (selectedReq) {
-    return <RequestDetail req={selectedReq} onBack={() => setSelectedReq(null)} />;
+    return <CenterRequestDetail req={selectedReq} onBack={() => setSelectedReq(null)} />;
   }
 
   return (
@@ -135,17 +136,19 @@ function RequestsTab() {
             </tr>
           </thead>
           <tbody>
-            {requests.map((req) => (
+            {pendingCenters.map((req: any) => (
               <tr key={req.id} className="border-b border-stone-100 hover:bg-stone-50 transition-colors">
-                <td className="p-4 font-medium text-stone-900">{req.name}</td>
+                <td className="p-4 font-medium text-stone-900">{req.centerName || req.name}</td>
                 <td className="p-4 text-stone-600">
-                  {req.communityLeaderFirstName} {req.communityLeaderLastName}
+                  {req.leaderFirstName} {req.leaderLastName}
                 </td>
                 <td className="p-4 text-stone-600">
                   {new Date(req.createdAt).toLocaleDateString()}
                 </td>
                 <td className="p-4">
-                  <StatusBadge status={req.status} />
+                  <span className="px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider bg-amber-100 text-amber-800">
+                    {t.requests.statuses.pending}
+                  </span>
                 </td>
                 <td className="p-4 text-right">
                   <button
@@ -157,7 +160,7 @@ function RequestsTab() {
                 </td>
               </tr>
             ))}
-            {requests.length === 0 && (
+            {pendingCenters.length === 0 && (
               <tr>
                 <td colSpan={5} className="p-8 text-center text-stone-500">
                   {t.requests.noRequests}
@@ -171,31 +174,30 @@ function RequestsTab() {
   );
 }
 
-function StatusBadge({ status }: { status: string }) {
-  const { t } = useTranslation();
-  const map: Record<string, { color: string; label: string }> = {
-    pending: { color: "bg-amber-100 text-amber-800", label: t.requests.statuses.pending },
-    approved: { color: "bg-green-100 text-green-800", label: t.requests.statuses.approved },
-    rejected: { color: "bg-red-100 text-red-800", label: t.requests.statuses.rejected },
-  };
-  const { color, label } = map[status] ?? { color: "bg-stone-100 text-stone-700", label: status };
-  return (
-    <span className={`px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider ${color}`}>
-      {label}
-    </span>
-  );
-}
-
-function RequestDetail({
+// ─── CenterRequestDetail ─────────────────────────────────────────────────────
+function CenterRequestDetail({
   req,
   onBack,
 }: {
-  req: CenterRegistrationRequest;
+  req: any;
   onBack: () => void;
 }) {
-  const updateStatus = useAdminStore((s) => s.updateRegistrationRequestStatus);
+  const updateCenterStatus = useAdminStore((s) => s.updateCenterStatus);
+  const fetchPendingCenters = useAdminStore((s) => s.fetchPendingCenters);  // เพิ่มบรรทัดนี้
   const { t } = useTranslation();
   const d = t.requests.detail;
+
+  const handleApprove = async () => {
+    await updateCenterStatus(req.centerId || req.id, "APPROVED");
+    await fetchPendingCenters();  // เพิ่มบรรทัดนี้
+    onBack();
+  };
+
+  const handleReject = async () => {
+    await updateCenterStatus(req.centerId || req.id, "REJECTED");
+    await fetchPendingCenters();  // เพิ่มบรรทัดนี้
+    onBack();
+  };
 
   return (
     <div className="bg-white rounded-2xl border border-stone-200 shadow-sm p-6 lg:p-8">
@@ -208,25 +210,25 @@ function RequestDetail({
 
       <div className="flex flex-wrap items-start justify-between gap-4 mb-8 border-b border-stone-100 pb-6">
         <div>
-          <h2 className="text-2xl font-bold text-stone-900 mb-2">{req.name}</h2>
-          <StatusBadge status={req.status} />
+          <h2 className="text-2xl font-bold text-stone-900 mb-2">{req.centerName || req.name}</h2>
+          <span className="px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider bg-amber-100 text-amber-800">
+            {t.requests.statuses.pending}
+          </span>
         </div>
-        {req.status === "pending" && (
-          <div className="flex gap-3">
-            <button
-              onClick={() => { updateStatus(req.id, "approved"); onBack(); }}
-              className="px-6 py-2.5 bg-green-500 hover:bg-green-600 text-white rounded-xl font-medium transition-colors flex items-center gap-2 text-sm"
-            >
-              <CheckCircle2 className="w-4 h-4" /> {d.approve}
-            </button>
-            <button
-              onClick={() => { updateStatus(req.id, "rejected"); onBack(); }}
-              className="px-6 py-2.5 bg-red-50 hover:bg-red-100 text-red-600 rounded-xl font-medium transition-colors flex items-center gap-2 text-sm"
-            >
-              <XCircle className="w-4 h-4" /> {d.reject}
-            </button>
-          </div>
-        )}
+        <div className="flex gap-3">
+          <button
+            onClick={handleApprove}
+            className="px-6 py-2.5 bg-green-500 hover:bg-green-600 text-white rounded-xl font-medium transition-colors flex items-center gap-2 text-sm"
+          >
+            <CheckCircle2 className="w-4 h-4" /> {d.approve}
+          </button>
+          <button
+            onClick={handleReject}
+            className="px-6 py-2.5 bg-red-50 hover:bg-red-100 text-red-600 rounded-xl font-medium transition-colors flex items-center gap-2 text-sm"
+          >
+            <XCircle className="w-4 h-4" /> {d.reject}
+          </button>
+        </div>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
@@ -239,14 +241,13 @@ function RequestDetail({
             <div>
               <dt className="text-xs font-semibold text-stone-500 uppercase tracking-wider mb-1">{d.phones}</dt>
               <ul className="text-stone-800 list-disc list-inside">
-                {req.telephones.map((t, i) => <li key={i}>{t}</li>)}
+                {(req.telephones || []).map((tel: string, i: number) => <li key={i}>{tel}</li>)}
               </ul>
             </div>
             <InfoRow label={d.email} value={req.email} />
-            <InfoRow label={d.lineId} value={req.lineId || "-"} />
+            <InfoRow label={d.lineId} value={req.line || "-"} />
             <InfoRow label={d.facebook} value={req.facebook || "-"} />
-            <InfoRow label={d.website} value={req.website || "-"} />
-            <InfoRow label={d.providers} value={req.providers?.join(", ") || "-"} />
+            <InfoRow label={d.website} value={req.webSite || "-"} />
           </dl>
         </div>
         <div>
@@ -254,8 +255,8 @@ function RequestDetail({
             {d.leaderInfo}
           </h3>
           <dl className="space-y-4">
-            <InfoRow label={d.name} value={`${req.communityLeaderFirstName} ${req.communityLeaderLastName}`} />
-            <InfoRow label={d.phone} value={req.communityLeaderTelephone} />
+            <InfoRow label={d.name} value={`${req.leaderFirstName} ${req.leaderLastName}`} />
+            <InfoRow label={d.phone} value={req.leaderTelephone} />
           </dl>
         </div>
       </div>
@@ -377,19 +378,19 @@ function UserManagementTab() {
 
   const roleLabel = (role?: string) => {
     const map: Record<string, string> = {
-      user: t.userMgmt.roles.user,
-      center: t.userMgmt.roles.center,
-      admin: t.userMgmt.roles.admin,
-      super_admin: t.userMgmt.roles.super_admin,
+      USER: t.userMgmt.roles.USER,
+      CENTER_ADMIN: t.userMgmt.roles.CENTER_ADMIN,
+      SYSTEM_ADMIN: t.userMgmt.roles.SYSTEM_ADMIN,
+      SUPER_ADMIN: t.userMgmt.roles.SUPER_ADMIN,
     };
-    return map[role ?? "user"] ?? t.userMgmt.roles.user;
+    return map[role ?? "USER"] ?? role ?? "User";
   };
 
   const roleColor = (role?: string) => {
     switch (role) {
-      case "super_admin": return "bg-purple-100 text-purple-800";
-      case "admin":       return "bg-blue-100 text-blue-800";
-      case "center":      return "bg-amber-100 text-amber-800";
+      case "SUPER_ADMIN": return "bg-purple-100 text-purple-800";
+      case "SYSTEM_ADMIN":       return "bg-blue-100 text-blue-800";
+      case "CENTER_ADMIN":      return "bg-amber-100 text-amber-800";
       default:            return "bg-stone-100 text-stone-700";
     }
   };
@@ -447,7 +448,8 @@ function UserManagementTab() {
                     </span>
                   </td>
                   <td className="p-4">
-                    <span className={`px-2.5 py-1 rounded-md text-xs font-semibold ${isActive ? "bg-green-50 text-green-700" : "bg-red-50 text-red-600"}`}>
+                    <span className={`px-2.5 py-1 rounded-md text-xs font-semibold
+                      ${isActive ? "bg-green-50 text-green-700" : "bg-red-50 text-red-600"}`}>
                       {isActive ? t.userMgmt.status.active : t.userMgmt.status.disabled}
                     </span>
                   </td>
@@ -527,74 +529,79 @@ function PrivilegesTab() {
             </tr>
           </thead>
           <tbody>
-            {filteredUsers.map((u) => (
-              <tr
-                key={u.id}
-                className="border-b border-stone-100 hover:bg-stone-50 transition-colors"
-              >
-                <td className="p-4">
-                  <div className="font-medium text-stone-900">{getDisplayName(u)}</div>
-                  <div className="text-sm text-stone-500">{u.email}</div>
-                </td>
-                <td className="p-4">
-                  <span
-                    className={`px-2.5 py-1 rounded-md text-xs font-semibold uppercase tracking-wider
-                      ${u.role === "super_admin" ? "bg-purple-100 text-purple-800" :
-                        u.role === "admin" ? "bg-blue-100 text-blue-800" :
-                        u.role === "center" ? "bg-amber-100 text-amber-800" :
-                        "bg-stone-100 text-stone-700"}`}
-                  >
-                    {u.role || "user"}
-                  </span>
-                </td>
-                <td className="p-4">
-                  <span
-                    className={`px-2.5 py-1 rounded-md text-xs font-semibold
-                      ${u.status === "suspended" ? "text-red-600 bg-red-50" : "text-green-600 bg-green-50"}`}
-                  >
-                    {u.status === "suspended" ? t.common.suspended : t.common.active}
-                  </span>
-                </td>
-                <td className="p-4 text-right">
-                  <div className="flex flex-wrap items-center justify-end gap-2">
-                    <button
-                      onClick={() => updateUserRole(u.id, "super_admin")}
-                      className="px-3 py-1.5 bg-purple-50 text-purple-700 hover:bg-purple-100 rounded-lg text-xs font-semibold transition flex items-center gap-1"
+            {filteredUsers.map((u) => {
+              const isSystemAdmin = u.role === "SYSTEM_ADMIN";
+              return (
+                <tr
+                  key={u.id}
+                  className="border-b border-stone-100 hover:bg-stone-50 transition-colors"
+                >
+                  <td className="p-4">
+                    <div className="font-medium text-stone-900">{getDisplayName(u)}</div>
+                    <div className="text-sm text-stone-500">{u.email}</div>
+                  </td>
+                  <td className="p-4">
+                    <span
+                      className={`px-2.5 py-1 rounded-md text-xs font-semibold uppercase tracking-wider
+                        ${u.role === "SYSTEM_ADMIN" ? "bg-red-100 text-red-800" :
+                          u.role === "super_admin" ? "bg-purple-100 text-purple-800" :
+                          u.role === "admin" ? "bg-blue-100 text-blue-800" :
+                          u.role === "center" ? "bg-amber-100 text-amber-800" :
+                          "bg-stone-100 text-stone-700"}`}
                     >
-                      <Shield className="w-3.5 h-3.5" /> {t.privileges.superAdmin}
-                    </button>
-                    <button
-                      onClick={() => updateUserRole(u.id, "admin")}
-                      className="px-3 py-1.5 bg-blue-50 text-blue-700 hover:bg-blue-100 rounded-lg text-xs font-semibold transition"
+                      {u.role || "user"}
+                    </span>
+                  </td>
+                  <td className="p-4">
+                    <span
+                      className={`px-2.5 py-1 rounded-md text-xs font-semibold
+                        ${u.status === "suspended" ? "text-red-600 bg-red-50" : "text-green-600 bg-green-50"}`}
                     >
-                      {t.privileges.subAdmin}
-                    </button>
-                    <button
-                      onClick={() => updateUserRole(u.id, "user")}
-                      className="px-3 py-1.5 bg-stone-100 text-stone-700 hover:bg-stone-200 rounded-lg text-xs font-semibold transition"
-                    >
-                      {t.privileges.revokeAdmin}
-                    </button>
-                    <div className="w-px h-6 bg-stone-200 mx-1" />
-                    {u.status === "suspended" ? (
-                      <button
-                        onClick={() => updateUserStatus(u.id, "active")}
-                        className="px-3 py-1.5 border border-green-200 text-green-600 hover:bg-green-50 rounded-lg text-xs font-semibold transition"
-                      >
-                        {t.privileges.unsuspend}
-                      </button>
-                    ) : (
-                      <button
-                        onClick={() => updateUserStatus(u.id, "suspended")}
-                        className="px-3 py-1.5 border border-red-200 text-red-600 hover:bg-red-50 rounded-lg text-xs font-semibold transition"
-                      >
-                        {t.privileges.suspend}
-                      </button>
+                      {u.status === "suspended" ? t.common.suspended : t.common.active}
+                    </span>
+                  </td>
+                  <td className="p-4 text-right">
+                    {!isSystemAdmin && (
+                      <div className="flex flex-wrap items-center justify-end gap-2">
+                        <button
+                          onClick={() => updateUserRole(u.id, "SUPER_ADMIN")}
+                          className="px-3 py-1.5 bg-purple-50 text-purple-700 hover:bg-purple-100 rounded-lg text-xs font-semibold transition flex items-center gap-1"
+                        >
+                          <Shield className="w-3.5 h-3.5" /> {t.privileges.superAdmin}
+                        </button>
+                        <button
+                          onClick={() => updateUserRole(u.id, "USER")}
+                          className="px-3 py-1.5 bg-stone-100 text-stone-700 hover:bg-stone-200 rounded-lg text-xs font-semibold transition"
+                        >
+                          {t.privileges.revokeAdmin}
+                        </button>
+                        <div className="w-px h-6 bg-stone-200 mx-1" />
+                        {u.status === "suspended" ? (
+                          <button
+                            onClick={() => updateUserStatus(u.id, "active")}
+                            className="px-3 py-1.5 border border-green-200 text-green-600 hover:bg-green-50 rounded-lg text-xs font-semibold transition"
+                          >
+                            {t.privileges.unsuspend}
+                          </button>
+                        ) : (
+                          <button
+                            onClick={() => updateUserStatus(u.id, "suspended")}
+                            className="px-3 py-1.5 border border-red-200 text-red-600 hover:bg-red-50 rounded-lg text-xs font-semibold transition"
+                          >
+                            {t.privileges.suspend}
+                          </button>
+                        )}
+                      </div>
                     )}
-                  </div>
-                </td>
-              </tr>
-            ))}
+                    {isSystemAdmin && (
+                      <span className="text-xs text-stone-500 italic">
+                        {t.privileges.systemAdminProtected || "Cannot modify System Admin"}
+                      </span>
+                    )}
+                  </td>
+                </tr>
+              );
+            })}
             {filteredUsers.length === 0 && (
               <tr>
                 <td colSpan={4} className="p-8 text-center text-stone-500">

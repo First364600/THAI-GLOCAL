@@ -1,7 +1,7 @@
-
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
 import apiClient from "../api/axiosClient";
+import { activities } from "../data/mockData";
 
 export interface UserCenter { [key: string]: any; }
 export interface UserWorkshop { [key: string]: any; }
@@ -39,6 +39,8 @@ interface MyCenterState {
   updateBookingStatus: (id: string, status: string) => Promise<void>;
   requestCancelBooking: (id: string, requestedBy: string) => Promise<void>;     
   approveCancelBooking: (id: string) => Promise<void>;
+
+  updateCenterStatus: (centerId: string, status: string) => Promise<void>;
 }
 
 const useMyCenterStore = create<MyCenterState>()(
@@ -198,6 +200,7 @@ const useMyCenterStore = create<MyCenterState>()(
           workshopType: data.workshopType ?? data.category,
           centerId: Number(centerId),
           workshopImages: data.workshopImages ?? data.images ?? [],
+          activities: data.activities ?? null,
         });
       },
       updateWorkshop: async (id, data) => {
@@ -260,6 +263,10 @@ const useMyCenterStore = create<MyCenterState>()(
       approveCancelBooking: async (id) => {
         console.warn("Feature Coming Soon");
         alert("Booking handling Feature Coming Soon");
+      },
+
+      updateCenterStatus: async (centerId: string, status: string) => {
+        await apiClient.patch(`/client/centers/${centerId}/status?status=${status}`);
       }
     }),
     { name: "tg_mycenter" }

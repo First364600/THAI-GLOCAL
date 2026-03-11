@@ -20,6 +20,7 @@ public record CenterResponse(
                 String leaderFirstName,
                 String leaderLastName,
                 String leaderTelephone,
+                String status,
                 List<String> centerImages,
                 List<String> telephones,
                 List<StaffResponse> staffResponses) {

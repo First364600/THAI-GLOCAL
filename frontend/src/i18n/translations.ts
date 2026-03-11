@@ -45,10 +45,10 @@ export const translations = {
         disable: "Disable",
       },
       roles: {
-        user: "User",
-        center: "Center",
-        admin: "Admin",
-        super_admin: "Super Admin",
+        USER: "User",
+        CENTER_ADMIN: "Center Admin",
+        SYSTEM_ADMIN: "System Admin",
+        SUPER_ADMIN: "Super Admin",
       },
       noUsers: "No users found.",
       disableConfirm: (name: string) =>
@@ -111,11 +111,11 @@ export const translations = {
         status: "Status",
         actions: "Actions",
       },
-      superAdmin: "Super Admin",
-      subAdmin: "Sub Admin",
+      superAdmin: "Make Super Admin",
       revokeAdmin: "Revoke Admin",
-      suspend: "Suspend Account",
+      suspend: "Suspend",
       unsuspend: "Unsuspend",
+      systemAdminProtected: "Cannot modify System Admin",
       noUsers: "No users found.",
     },
     requests: {
@@ -329,10 +329,10 @@ export const translations = {
         disable: "ปิดใช้งาน",
       },
       roles: {
-        user: "ผู้ใช้",
-        center: "ศูนย์",
-        admin: "ผู้ดูแล",
-        super_admin: "ผู้ดูแลสูงสุด",
+        USER: "ผู้ใช้",
+        CENTER_ADMIN: "ผู้ดูแลศูนย์",
+        SYSTEM_ADMIN: "ผู้ดูแลระบบ",
+        SUPER_ADMIN: "ผู้ดูแลสูงสุด",
       },
       noUsers: "ไม่พบผู้ใช้",
       disableConfirm: (name: string) =>
@@ -400,6 +400,7 @@ export const translations = {
       revokeAdmin: "เพิกถอนสิทธิ์",
       suspend: "ระงับบัญชี",
       unsuspend: "ยกเลิกการระงับ",
+      systemAdminProtected: "ไม่สามารถแก้ไขผู้ดูแลระบบ",
       noUsers: "ไม่พบผู้ใช้",
     },
     requests: {
