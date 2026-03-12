@@ -1,1 +1,3 @@
 frontend/node_modules
+server/src/main/resources/application.properties
+webclient/src/main/resources/application.properties
