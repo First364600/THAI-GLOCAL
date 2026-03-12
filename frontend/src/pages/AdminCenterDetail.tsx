@@ -62,6 +62,9 @@ export function AdminCenterDetail({
     { key: "status",    label: t.centerDetail.tabs.status },
   ];
 
+  // เพิ่มบรรทัดนี้ - กำหนดค่า default สำหรับ centerName
+  const centerName = center.name ?? center.centerName ?? "Unknown Center";
+
   return (
     <div>
       {/* Header */}
@@ -73,8 +76,8 @@ export function AdminCenterDetail({
           >
             {t.centerDetail.backToList}
           </button>
-          <h2 className="text-2xl font-bold text-stone-900">{center.name}</h2>
-          <p className="text-stone-500 text-sm">{center.location}, {center.province}</p>
+          <h2 className="text-2xl font-bold text-stone-900">{centerName}</h2>
+          <p className="text-stone-500 text-sm">{center.location ?? center.subDistrict}, {center.province}</p>
         </div>
         <CenterStatusPill centerId={centerId} />
       </div>
@@ -99,7 +102,7 @@ export function AdminCenterDetail({
       {activeTab === "info"      && <CenterInfoTab centerId={centerId} />}
       {activeTab === "workshops" && <CenterWorkshopsTab centerId={centerId} />}
       {activeTab === "bookings"  && <CenterBookingsTab centerId={centerId} />}
-      {activeTab === "status"    && <CenterStatusTab centerId={centerId} centerName={center.name} />}
+      {activeTab === "status"    && <CenterStatusTab centerId={centerId} centerName={centerName} />}
     </div>
   );
 }
@@ -132,19 +135,19 @@ function CenterInfoTab({ centerId }: { centerId: string }) {
   const userCenter = useMyCenterStore((s) => s.centers.find((c) => c.id === centerId));
   const updateCenter = useMyCenterStore((s) => s.updateCenter);
 
-  const [name, setName] = useState(center?.name ?? "");
+  const [name, setName] = useState(center?.name ?? center?.centerName ?? "");
   const [nameTh, setNameTh] = useState(center?.nameTh ?? "");
-  const [location, setLocation] = useState(center?.location ?? userCenter?.subDistrict ?? "");
+  const [location, setLocation] = useState(center?.location ?? center?.subDistrict ?? userCenter?.subDistrict ?? "");
   const [province, setProvince] = useState(center?.province ?? userCenter?.province ?? "");
   const [description, setDescription] = useState(center?.description ?? userCenter?.description ?? "");
-  const [email, setEmail] = useState(userCenter?.email ?? "");
-  const [website, setWebsite] = useState(userCenter?.website ?? "");
-  const [lineId, setLineId] = useState(userCenter?.lineId ?? "");
-  const [facebook, setFacebook] = useState(userCenter?.facebook ?? "");
-  const [phones, setPhones] = useState<string[]>(userCenter?.telephones ?? [""]);
-  const [leaderFirst, setLeaderFirst] = useState(userCenter?.communityLeaderFirstName ?? "");
-  const [leaderLast, setLeaderLast] = useState(userCenter?.communityLeaderLastName ?? "");
-  const [leaderPhone, setLeaderPhone] = useState(userCenter?.communityLeaderTelephone ?? "");
+  const [email, setEmail] = useState(center?.email ?? userCenter?.email ?? "");
+  const [website, setWebsite] = useState(center?.website ?? userCenter?.website ?? "");
+  const [lineId, setLineId] = useState(center?.lineId ?? userCenter?.lineId ?? "");
+  const [facebook, setFacebook] = useState(center?.facebook ?? userCenter?.facebook ?? "");
+  const [phones, setPhones] = useState<string[]>(center?.telephones ?? userCenter?.telephones ?? [""]);
+  const [leaderFirst, setLeaderFirst] = useState(center?.communityLeaderFirstName ?? userCenter?.communityLeaderFirstName ?? "");
+  const [leaderLast, setLeaderLast] = useState(center?.communityLeaderLastName ?? userCenter?.communityLeaderLastName ?? "");
+  const [leaderPhone, setLeaderPhone] = useState(center?.communityLeaderTelephone ?? userCenter?.communityLeaderTelephone ?? "");
   const [saved, setSaved] = useState(false);
 
   const handleSave = () => {

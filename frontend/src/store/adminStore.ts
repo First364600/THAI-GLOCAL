@@ -17,14 +17,26 @@ export interface AdminUser {
 
 export interface AdminCenter {
   id: string;
-  name: string;
+  centerId?: number;
+  centerName: string;
+  name?: string;
   nameTh?: string;
-  owner: string;
-  location?: string;
-  province?: string;
   description?: string;
-  status: "pending" | "approved" | "rejected";
-  createdAt: string;
+  address?: string;
+  location?: string;
+  subDistrict?: string;
+  district?: string;
+  province?: string;
+  email?: string;
+  website?: string;
+  lineId?: string;
+  facebook?: string;
+  telephones?: string[];
+  communityLeaderFirstName?: string;
+  communityLeaderLastName?: string;
+  communityLeaderTelephone?: string;
+  status?: CenterStatus;
+  createdAt?: string;
 }
 
 export interface CenterRegistrationRequest {
@@ -66,11 +78,11 @@ interface AdminState {
   fetchPendingCenters: () => Promise<void>;
 
   updateUserStatus: (id: string, status: "active" | "inactive" | "suspended") => Promise<void>;
-  updateUserRole: (id: string, role: string) => Promise<void>;  // เพิ่มบรรทัดนี้
+  updateUserRole: (id: string, role: string) => Promise<void>;
   updateCenterStatus: (id: string | number, status: string) => Promise<void>;
   updateUserInfo: (id: string, data: any) => Promise<void>;
   deleteUser: (id: string) => Promise<void>;
-  deleteCenter: (id: string) => Promise<void>;  // เพิ่มบรรทัดนี้
+  deleteCenter: (id: string) => Promise<void>;
 
   updateRegistrationRequestStatus: (id: number, status: "pending" | "approved" | "rejected") => Promise<void>;
   updateAdminCenter: (id: string, data: any) => Promise<void>;

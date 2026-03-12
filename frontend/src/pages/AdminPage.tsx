@@ -1,11 +1,12 @@
 import { useState, useEffect } from "react";
 import { Navigate } from "react-router";
 import useAuthStore from "../store/authStore";
-import useAdminStore, { CenterRegistrationRequest, CenterStatus } from "../store/adminStore";
+import useAdminStore, { AdminCenter, CenterRegistrationRequest, CenterStatus } from "../store/adminStore";
 import { useTranslation } from "../i18n/useTranslation";
 import { AdminCenterDetail } from "./AdminCenterDetail";
 import { AdminUserDetail } from "./AdminUserDetail";
 import { CheckCircle2, XCircle, Search, Trash2, Shield, AlertTriangle, Type } from "lucide-react";
+import { Center } from "../data/mockData";
 
 export const getDisplayName = (u: any) =>
   [u.firstName, u.lastName].filter(Boolean).join(' ') || u.username || u.email || '';
@@ -75,7 +76,7 @@ export function AdminPage() {
     { key: "requests", label: t.admin.tabs.requests },
     { key: "centers", label: t.admin.tabs.centers },
     { key: "users", label: t.admin.tabs.userManagement },
-    { key: "privileges", label: t.admin.tabs.privileges },
+    ...(user.role === "SYSTEM_ADMIN" ? [{ key: "privileges" as const, label: t.admin.tabs.privileges }] : []),
   ];
 
   return (
@@ -107,7 +108,7 @@ export function AdminPage() {
         {activeTab === "requests" && <RequestsTab />}
         {activeTab === "centers" && <CentersTab />}
         {activeTab === "users" && <UserManagementTab />}
-        {activeTab === "privileges" && <PrivilegesTab />}
+        {activeTab === "privileges" && user.role === "SYSTEM_ADMIN" && <PrivilegesTab />}
       </div>
     </div>
   );
@@ -324,11 +325,13 @@ function CentersTab() {
             </tr>
           </thead>
           <tbody>
-            {centers.map((center) => (
+            {centers.map((center: AdminCenter) => (
               <tr key={center.id} className="border-b border-stone-100 hover:bg-stone-50 transition-colors">
-                <td className="p-4 text-stone-500 text-sm font-mono">{center.id}</td>
-                <td className="p-4 font-medium text-stone-900">{center.name}</td>
-                <td className="p-4 text-stone-600">{center.location}, {center.province}</td>
+                <td className="p-4 text-stone-500 text-sm font-mono">{center.centerId}</td>
+                <td className="p-4 font-medium text-stone-900">{center.centerName || center.name}</td>
+                <td className="p-4 text-stone-600 text-sm">
+                  {center.subDistrict}, {center.district}, {center.province}
+                </td>
                 <td className="p-4">
                   <span className={`px-2.5 py-1 rounded-md text-xs font-semibold ${statusColor(center.id)}`}>
                     {statusLabel(center.id)}
@@ -337,13 +340,16 @@ function CentersTab() {
                 <td className="p-4 text-right">
                   <div className="flex items-center justify-end gap-2">
                     <button
-                      onClick={() => setSelectedId(center.id)}
+                      onClick={() => {
+                        console.log("Center data:", center);  // Debug: ดูข้อมูล center
+                        setSelectedId(center.id);
+                      }}
                       className="px-3 py-1.5 bg-amber-50 text-amber-700 hover:bg-amber-100 rounded-lg text-xs font-semibold transition"
                     >
                       {t.centers.manage}
                     </button>
                     <button
-                      onClick={() => confirmDelete(center.id, center.name)}
+                      onClick={() => confirmDelete(center.id, center.centerName)}
                       className="p-2 text-stone-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
                       title="Delete Center"
                     >
