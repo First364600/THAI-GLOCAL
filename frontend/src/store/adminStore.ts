@@ -66,11 +66,14 @@ interface AdminState {
   fetchPendingCenters: () => Promise<void>;
 
   updateUserStatus: (id: string, status: "active" | "inactive" | "suspended") => Promise<void>;
+  updateUserRole: (id: string, role: string) => Promise<void>;  // เพิ่มบรรทัดนี้
   updateCenterStatus: (id: string | number, status: string) => Promise<void>;
   updateUserInfo: (id: string, data: any) => Promise<void>;
   deleteUser: (id: string) => Promise<void>;
+  deleteCenter: (id: string) => Promise<void>;  // เพิ่มบรรทัดนี้
 
   updateRegistrationRequestStatus: (id: number, status: "pending" | "approved" | "rejected") => Promise<void>;
+  updateAdminCenter: (id: string, data: any) => Promise<void>;
 
   getSystemLogs: () => Promise<any[]>;
 }
@@ -150,31 +153,13 @@ const useAdminStore = create<AdminState>((set, get) => ({
     } catch (e) { console.error(e); }
   },
 
-  updateUserRole: async (id: any, role: any) => {
+  updateUserRole: async (id: string, role: string) => {
     try {
       await apiClient.patch(`/client/users/admin/role/${id}`, { role });
       set((state) => ({
         users: state.users.map((u) => (u.id === id ? { ...u, role } : u)),
       }));
     } catch (e) { console.error(e); }
-  },
-
-  updateUserInfo: async (id, data) => {
-    try {
-      await apiClient.patch(`/client/users/admin/${id}`, data);
-      set((state) => ({
-        users: state.users.map((u) => (u.id === id ? { ...u, ...data } : u)),
-      }));
-    } catch (e) { console.error(e); }
-  },
-
-  deleteUser: async (id) => {
-    try {
-      await apiClient.delete(`/client/users/admin/${id}`);
-      set((state) => ({
-        users: state.users.filter((u) => u.id !== id),
-      }));
-    } catch(e) { console.error(e); }
   },
 
   updateCenterStatus: async (id, status) => {
@@ -196,7 +181,45 @@ const useAdminStore = create<AdminState>((set, get) => ({
     }
   },
 
-  updateAdminCenter: async (id: any, data: any) => {
+  updateUserInfo: async (id, data) => {
+    try {
+      await apiClient.patch(`/client/users/admin/${id}`, data);
+      set((state) => ({
+        users: state.users.map((u) => (u.id === id ? { ...u, ...data } : u)),
+      }));
+    } catch (e) { console.error(e); }
+  },
+
+  deleteUser: async (id) => {
+    try {
+      await apiClient.delete(`/client/users/admin/${id}`);
+      set((state) => ({
+        users: state.users.filter((u) => u.id !== id),
+      }));
+    } catch(e) { console.error(e); }
+  },
+
+  deleteCenter: async (id: string) => {
+    try {
+       await apiClient.delete(`/client/centers/delete/${id}`);
+       set((state) => ({
+          centers: state.centers.filter((c) => c.id !== id),
+       }));
+    } catch(e) { console.error(e); }
+  },
+
+  updateRegistrationRequestStatus: async (id, status) => {
+    try {
+      await apiClient.patch(`/client/admin/registration-requests/${id}/status`, { status });
+      set((state) => ({
+        registrationRequests: state.registrationRequests.map((r) =>
+          r.id === id ? { ...r, status } : r
+        ),
+      }));
+    } catch(e) { console.error(e); }
+  },
+
+  updateAdminCenter: async (id: string, data: any) => {
     try {
       const payload: any = {};
       if (data.name !== undefined) payload.centerName = data.name;
@@ -217,26 +240,6 @@ const useAdminStore = create<AdminState>((set, get) => ({
         adminCenters: state.adminCenters.map((c) => (c.id === id ? { ...c, ...data } : c)),
       }));
     } catch (e) { console.error(e); }
-  },
-
-  deleteCenter: async (id: any) => {
-    try {
-       await apiClient.delete(`/client/centers/delete/${id}`);
-       set((state) => ({
-          centers: state.centers.filter((c) => c.id !== id),
-       }));
-    } catch(e) { console.error(e); }
-  },
-
-  updateRegistrationRequestStatus: async (id, status) => {
-    try {
-      await apiClient.patch(`/client/admin/registration-requests/${id}/status`, { status });
-      set((state) => ({
-        registrationRequests: state.registrationRequests.map((r) =>
-          r.id === id ? { ...r, status } : r
-        ),
-      }));
-    } catch(e) { console.error(e); }
   },
 
   getSystemLogs: async () => {

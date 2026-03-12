@@ -5,7 +5,7 @@ import useAdminStore, { CenterRegistrationRequest, CenterStatus } from "../store
 import { useTranslation } from "../i18n/useTranslation";
 import { AdminCenterDetail } from "./AdminCenterDetail";
 import { AdminUserDetail } from "./AdminUserDetail";
-import { CheckCircle2, XCircle, Search, Trash2, Shield, AlertTriangle } from "lucide-react";
+import { CheckCircle2, XCircle, Search, Trash2, Shield, AlertTriangle, Type } from "lucide-react";
 
 export const getDisplayName = (u: any) =>
   [u.firstName, u.lastName].filter(Boolean).join(' ') || u.username || u.email || '';
@@ -15,16 +15,21 @@ function ToggleSwitch({
   checked,
   onChange,
   label,
+  disabled = false,
 }: {
   checked: boolean;
   onChange: (val: boolean) => void;
   label?: string;
+  disabled?: boolean;
 }) {
   return (
     <button
-      onClick={() => onChange(!checked)}
+      onClick={() => !disabled && onChange(!checked)}
+      disabled={disabled}
       title={label}
       className={`relative inline-flex items-center w-11 h-6 rounded-full transition-colors focus:outline-none ${
+        disabled ? "opacity-50 cursor-not-allowed" : ""
+      } ${
         checked ? "bg-green-500" : "bg-stone-300"
       }`}
       aria-pressed={checked}
@@ -363,6 +368,7 @@ function CentersTab() {
 // ─── UserManagementTab ────────────────────────────────────────────────────────
 function UserManagementTab() {
   const users = useAdminStore((s) => s.users);
+  const currentUser = useAuthStore((s) => s.user); 
   const updateUserStatus = useAdminStore((s) => s.updateUserStatus);
   const { t } = useTranslation();
   const [searchQuery, setSearchQuery] = useState("");
@@ -370,6 +376,11 @@ function UserManagementTab() {
 
   if (selectedUserId) {
     return <AdminUserDetail userId={selectedUserId} onBack={() => setSelectedUserId(null)} />;
+  }
+
+  // เพิ่มการตรวจสอบ currentUser
+  if (!currentUser) {
+    return <div className="p-8 text-center text-stone-500">Loading...</div>;
   }
 
   const filtered = users.filter((u) =>
@@ -389,13 +400,30 @@ function UserManagementTab() {
   const roleColor = (role?: string) => {
     switch (role) {
       case "SUPER_ADMIN": return "bg-purple-100 text-purple-800";
-      case "SYSTEM_ADMIN":       return "bg-blue-100 text-blue-800";
-      case "CENTER_ADMIN":      return "bg-amber-100 text-amber-800";
-      default:            return "bg-stone-100 text-stone-700";
+      case "SYSTEM_ADMIN": return "bg-blue-100 text-blue-800";
+      case "CENTER_ADMIN": return "bg-amber-100 text-amber-800";
+      default: return "bg-stone-100 text-stone-700";
     }
   };
 
   const handleToggle = (userId: string, currentStatus: string | undefined, name: string) => {
+    // ตรวจสอบ currentUser ก่อน
+    if (!currentUser) {
+      alert("Please login first");
+      return;
+    }
+
+    // Convert both to string เพื่อ compare
+    const currentUserId = String(currentUser.id);
+    const targetUserId = String(userId);
+    
+    console.log("Comparing:", currentUserId, "===", targetUserId, "Result:", currentUserId === targetUserId);
+
+    if (currentUserId === targetUserId) {
+      alert(t.privileges.systemAdminProtected || "Cannot modify your own account");
+      return;
+    }
+
     if (currentStatus !== "suspended") {
       if (!window.confirm(t.userMgmt.disableConfirm(name))) return;
       updateUserStatus(userId, "suspended");
@@ -435,12 +463,16 @@ function UserManagementTab() {
           <tbody>
             {filtered.map((u) => {
               const isActive = u.status !== "suspended";
+              const isCurrentUser = String(currentUser?.id) === String(u.id);              
               return (
                 <tr key={u.id} className={`border-b border-stone-100 hover:bg-stone-50 transition-colors ${!isActive ? "opacity-60" : ""}`}>
                   <td className="p-4 text-stone-400 text-xs font-mono max-w-30 truncate" title={u.id}>
                     {u.id}
                   </td>
-                  <td className="p-4 font-medium text-stone-900">{getDisplayName(u)}</td>
+                  <td className="p-4 font-medium text-stone-900">
+                    {getDisplayName(u)}
+                    {isCurrentUser && <span className="text-xs text-amber-600 ml-2">(You)</span>}
+                  </td>
                   <td className="p-4 text-stone-600 text-sm">{u.email}</td>
                   <td className="p-4">
                     <span className={`px-2.5 py-1 rounded-md text-xs font-semibold uppercase tracking-wider ${roleColor(u.role)}`}>
@@ -459,6 +491,7 @@ function UserManagementTab() {
                         checked={isActive}
                         onChange={() => handleToggle(u.id, u.status, getDisplayName(u))}
                         label={isActive ? t.userMgmt.toggle.disable : t.userMgmt.toggle.enable}
+                        disabled={isCurrentUser || u.role === "SYSTEM_ADMIN"}
                       />
                       <span className="text-xs text-stone-500 w-14">
                         {isActive ? t.userMgmt.toggle.disable : t.userMgmt.toggle.enable}
